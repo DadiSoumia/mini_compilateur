@@ -11,21 +11,18 @@ lettre [a-zA-Z]+
 chiffre [0-9]+
 IDF {lettre}({lettre}|{chiffre}|_)*
 cst {chiffre}+
-int {chiffre}+|-{chiffre}+ 
-operateulogique "<="|">="|"=="|"!="|"<"|">"
-operateur |"+"|"-"|"*"|"/"
-symbole ";"|"(" |")"|"{"|"}"|":"|","|""\"
+
 
 %%
 "Declaration" printf("motcle\n");
-"int" printf("motcle\n");
-"flot" printf("motcle\n");
 "Code" printf("motcle\n");
 "print" printf("motcle\n");
 "IF" printf("motcle\n");
 "ELSE" printf("motcle\n");
 "Do" printf("motcle\n");
 "END" printf("motcle\n");
+"int" printf("type\n");
+"flot" printf("type\n");
 
 
 {IDF} printf("identificateur\n"); 
