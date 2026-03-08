@@ -1,0 +1,73 @@
+BeginProject M1_IV_2526;
+
+Setup :
+
+%% Déclaration de variables simples
+define a | b | c : integer;
+define moyenne : float = 0.0;
+
+%% Déclaration avec initialisation
+define compteur : integer = 10;
+
+%% Déclaration tableau
+define Tab : [integer ;20] ;
+
+%% Constantes
+const Pi : float = 3.14159;
+const Max : integer = 100;
+
+Run :
+{
+
+%% Affectations simples
+a <- 5;
+b <- (-5);
+c <- (+5);
+
+moyenne <- 5.5;
+moyenne <- (-5.76);
+moyenne <- (+568.77);
+
+%% Affectation avec expression
+a <- (b + 2) / (5 - c + (-3));
+
+%% Condition
+if (a + 2 > b) then:
+{
+    c <- a * 2;
+}
+else{
+    c <- c - 1;
+}
+endIf;
+
+%% Boucle while
+loop while (a < 10)
+{
+    a <- a + 1;
+}
+endloop;
+
+%% Boucle for
+for i in 1 to 10 {
+    b <- b * i;
+}
+endfor;
+
+%% Input / Output
+in(UserName);
+out("Vous avez saisi: ", UserName);
+
+%% Expressions logiques
+if (a > b AND NON(c < 5)) then:
+{
+    out("Condition vraie");
+}
+else{
+    out("Condition fausse");
+}
+endIf;
+
+}
+
+EndProject;
