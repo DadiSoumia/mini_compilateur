@@ -14,28 +14,7 @@ void valider_idf(char* txt) {
     }
 }
 
-void valider_entier(char* txt, int num) {
-    int valeur;
-    if (num) {
-        char tmp[20];
-        int i=0, j=0;
-        while(txt[i] != '\0') {
-            if(txt[i] != '(' && txt[i] != ')' && txt[i] != ' ') {
-                tmp[j++] = txt[i];
-            }
-            i++;
-        }
-        tmp[j] = '\0';
-        valeur = atoi(tmp);
-    } else {
-        valeur = atoi(txt);
-    }
-    if (valeur < -32768 || valeur > 32767) {
-        printf("Erreur Lexicale, ligne %d, colonne %d, Entier hors limite : %s\n", nb_ligne, nb_colonne, txt);
-    } else {
-        printf("Mot detecte : Constante Entiere (%d)\n", valeur);
-    }
-}
+
 
 %}
 
@@ -125,8 +104,8 @@ COMM_ligne "%%".*
 
 {CHAINE}            { printf("Chaine de caracteres : %s\n", yytext); nb_colonne += yyleng; }
 
-{INTEGER}           { valider_entier(yytext, 0); nb_colonne += yyleng; }
-{INTEGER_signe}     { valider_entier(yytext, 1); nb_colonne += yyleng; }
+{INTEGER}           { printf("Constante entiere : %s\n", yytext); nb_colonne += yyleng;  }
+{INTEGER_signe}     { printf("Constante entiere signee : %s\n", yytext); nb_colonne += yyleng;  }
 
 {FLOAT}             { printf("Constante Reelle : %s\n", yytext); nb_colonne += yyleng; }
 {FLOAT_signe}       { printf("Constante Reelle Signee : %s\n", yytext); nb_colonne += yyleng; }

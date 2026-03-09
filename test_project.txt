@@ -1,20 +1,16 @@
-BeginProject M1_IV_2526;
+BeginProject M1_iv_2526;
 
 Setup :
 
-%% Déclaration de variables simples
+%% Déclaration 
 define a | b | c : integer;
-define moyenne : float = 0.0;
 
-%% Déclaration avec initialisation
 define compteur : integer = 10;
 
-%% Déclaration tableau
 define Tab : [integer ;20] ;
 
-%% Constantes
 const Pi : float = 3.14159;
-const Max : integer = 100;
+
 
 Run :
 {
@@ -22,13 +18,14 @@ Run :
 %% Affectations simples
 a <- 5;
 b <- (-5);
-c <- (+5);
+
 
 moyenne <- 5.5;
-moyenne <- (-5.76);
+
 moyenne <- (+568.77);
 
 %% Affectation avec expression
+
 a <- (b + 2) / (5 - c + (-3));
 
 %% Condition
