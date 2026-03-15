@@ -31,7 +31,8 @@ FLOAT_signe \([+-]{chiffre}+"."{chiffre}+\)
 IDF {lettre}(_?[a-zA-Z0-9])*
 CST INTEGER|FLOAT|INTEGER_signe|FLOAT_signe
 
-CHAINE \"[^\"]*\" 
+// CHAINE \"[^\"]*\" 
+CHAINE \"([^\"\\]|\\.)*\"
 
 COMM_ligne "%%".*
 %x COMMENT_MULTI
@@ -46,26 +47,26 @@ COMM_ligne "%%".*
 <COMMENT_MULTI>\n       { nb_ligne++; nb_colonne = 1; }
 <COMMENT_MULTI>.        { nb_colonne += yyleng; }
 
-"BeginProject"  { printf("Mot-cle : BeginProject\n"); nb_colonne += yyleng;  return beginProject; }
+"BeginProject"  { printf("Mot-cle : BeginProject\n"); nb_colonne += yyleng;  return begin; }
 "EndProject"    { printf("Mot-cle : EndProject\n"); nb_colonne += yyleng;  return endProject; }
 "Setup"         { printf("Mot-cle : Setup\n"); nb_colonne += yyleng;  return setup; }
 "Run"           { printf("Mot-cle : Run\n"); nb_colonne += yyleng;  return run; }
 
 "define"        { printf("Mot-cle : define\n"); nb_colonne += yyleng; return define; }
-"const"         { printf("Mot-cle : const\n"); nb_colonne += yyleng; return const; }
+"const"         { printf("Mot-cle : const\n"); nb_colonne += yyleng; return const_kw ; }
 "integer"       { printf("Mot-cle (Type) : integer\n"); nb_colonne += yyleng; return integer; }
-"float"         { printf("Mot-cle (Type) : float\n"); nb_colonne += yyleng; return float; }
+"float"         { printf("Mot-cle (Type) : float\n"); nb_colonne += yyleng; return float_kw; }
 
-"if"            { printf("Mot-cle : if\n"); nb_colonne += yyleng; return if; }
+"if"            { printf("Mot-cle : if\n"); nb_colonne += yyleng; return if_kw; }
 "then"          { printf("Mot-cle : then\n"); nb_colonne += yyleng; return then; }
-"else"          { printf("Mot-cle : else\n"); nb_colonne += yyleng; return else; }
+"else"          { printf("Mot-cle : else\n"); nb_colonne += yyleng; return else_kw; }
 "endIf"         { printf("Mot-cle : endIf\n"); nb_colonne += yyleng; return endIf; }
 
-"loop"          { printf("Mot-cle : loop\n"); nb_colonne += yyleng; return loop; }
-"while"         { printf("Mot-cle : while\n"); nb_colonne += yyleng; return while; }
+"loop while"          { printf("Mot-cle : loop\n"); nb_colonne += yyleng; return loop; }
+"while"         { printf("Mot-cle : while\n"); nb_colonne += yyleng; return while_kw; }
 "endloop"       { printf("Mot-cle : endloop\n"); nb_colonne += yyleng; return endloop; }
 
-"for"           { printf("Mot-cle : for\n"); nb_colonne += yyleng; return for; }
+"for"           { printf("Mot-cle : for\n"); nb_colonne += yyleng; return for_kw; }
 "in"            { printf("Mot-cle : in\n"); nb_colonne += yyleng; return in; }
 "to"            { printf("Mot-cle : to\n"); nb_colonne += yyleng; return to; }
 "endfor"        { printf("Mot-cle : endfor\n"); nb_colonne += yyleng; return endfor; }
@@ -76,8 +77,8 @@ COMM_ligne "%%".*
 "OR"            { printf("Op. Logique : OR\n"); nb_colonne += yyleng; return OR; }
 "NON"           { printf("Op. Logique : NON\n"); nb_colonne += yyleng; return NON; }
 
-"+"             { printf("Op. Arithmetique : +\n"); nb_colonne += yyleng; return plus; }
-"-"             { printf("Op. Arithmetique : -\n"); nb_colonne += yyleng; return moins; }
+"+"             { printf("Op. Arithmetique : +\n"); nb_colonne += yyleng; return add; }
+"-"             { printf("Op. Arithmetique : -\n"); nb_colonne += yyleng; return sus ; }
 "*"             { printf("Op. Arithmetique : *\n"); nb_colonne += yyleng; return mult; }
 "/"             { printf("Op. Arithmetique : /\n"); nb_colonne += yyleng; return Div; }
 
@@ -88,6 +89,7 @@ COMM_ligne "%%".*
 ">"             { printf("Op. Comparaison : >\n"); nb_colonne += yyleng; return sup; }
 "<"             { printf("Op. Comparaison : <\n"); nb_colonne += yyleng; return inf; }
 "<-"            { printf("Op. Affectation : <-\n"); nb_colonne += yyleng; return affectation; }
+"="            { printf("Op. Comparaison : !=\n"); nb_colonne += yyleng; return egg; }
 
 ";"             { printf("Ponctuation : ;\n"); nb_colonne += yyleng; return pointverg; }
 ":"             { printf("Ponctuation : :\n"); nb_colonne += yyleng; return deuxpoint; }
@@ -105,10 +107,12 @@ COMM_ligne "%%".*
 {INTEGER}       { printf("Constante entiere : %s\n", yytext); nb_colonne += yyleng;  return integer; }
 {INTEGER_signe} { printf("Constante entiere signee : %s\n", yytext); nb_colonne += yyleng;  return integer_signe; }
 
-{FLOAT}         { printf("Constante Reelle : %s\n", yytext); nb_colonne += yyleng; return float; }
+{FLOAT}         { printf("Constante Reelle : %s\n", yytext); nb_colonne += yyleng; return float_kw; }
 {FLOAT_signe}   { printf("Constante Reelle Signee : %s\n", yytext); nb_colonne += yyleng; return float_signe; }
 
-{IDF}           { valider_idf(yytext); nb_colonne += yyleng; return idf; }
+{IDF}           { valider_idf(yytext); nb_colonne += yyleng;  return idf; }
+
+
 
 .               { printf("Erreur Lexicale, ligne %d, colonne %d, entité : %s\n", nb_ligne, nb_colonne, yytext); nb_colonne += yyleng; return erreur; }
 
@@ -119,8 +123,11 @@ int yywrap() {
 }
 
 int main() {
+      int token;
     printf("\n Lancement Lexical \n");
-    yylex();
+     while ((token = yylex()) != 0) {
+        // rien à faire, les printf de chaque token sont déjà dans les règles Flex
+    }
     printf("\n Fin Lexical \n");
     return 0;
 }
