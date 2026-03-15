@@ -41,8 +41,8 @@ COMM_ligne "%%".*
 \n              { nb_ligne++; nb_colonne = 1; }
 {COMM_ligne}    { nb_colonne += yyleng; }
 
-"//*"                   { BEGIN(COMMENT_MULTI); nb_colonne += yyleng;  return 0; }
-<COMMENT_MULTI>"*//"    { BEGIN(INITIAL); nb_colonne += yyleng; return 0; }
+"//*"                   { BEGIN(COMMENT_MULTI); nb_colonne += yyleng;  }
+<COMMENT_MULTI>"*//"    { BEGIN(INITIAL); nb_colonne += yyleng;}
 <COMMENT_MULTI>\n       { nb_ligne++; nb_colonne = 1; }
 <COMMENT_MULTI>.        { nb_colonne += yyleng; }
 
