@@ -31,7 +31,6 @@ FLOAT_signe \([+-]{chiffre}+"."{chiffre}+\)
 IDF {lettre}(_?[a-zA-Z0-9])*
 CST INTEGER|FLOAT|INTEGER_signe|FLOAT_signe
 
-// CHAINE \"[^\"]*\" 
 CHAINE \"([^\"\\]|\\.)*\"
 
 COMM_ligne "%%".*
@@ -62,12 +61,12 @@ COMM_ligne "%%".*
 "else"          { printf("Mot-cle : else\n"); nb_colonne += yyleng; return else_kw; }
 "endIf"         { printf("Mot-cle : endIf\n"); nb_colonne += yyleng; return endIf; }
 
-"loop while"          { printf("Mot-cle : loop\n"); nb_colonne += yyleng; return loop; }
+"loop"          { printf("Mot-cle : loop\n"); nb_colonne += yyleng; return loop; }
 "while"         { printf("Mot-cle : while\n"); nb_colonne += yyleng; return while_kw; }
 "endloop"       { printf("Mot-cle : endloop\n"); nb_colonne += yyleng; return endloop; }
 
 "for"           { printf("Mot-cle : for\n"); nb_colonne += yyleng; return for_kw; }
-"in"            { printf("Mot-cle : in\n"); nb_colonne += yyleng; return in; }
+"in"            { printf("Mot-cle : in\n"); nb_colonne += yyleng; return in_kw; }
 "to"            { printf("Mot-cle : to\n"); nb_colonne += yyleng; return to; }
 "endfor"        { printf("Mot-cle : endfor\n"); nb_colonne += yyleng; return endfor; }
 
@@ -89,7 +88,7 @@ COMM_ligne "%%".*
 ">"             { printf("Op. Comparaison : >\n"); nb_colonne += yyleng; return sup; }
 "<"             { printf("Op. Comparaison : <\n"); nb_colonne += yyleng; return inf; }
 "<-"            { printf("Op. Affectation : <-\n"); nb_colonne += yyleng; return affectation; }
-"="            { printf("Op. Comparaison : !=\n"); nb_colonne += yyleng; return egg; }
+"="            { printf("Op. Affectation/Egal : =\n"); nb_colonne += yyleng; return egg; }
 
 ";"             { printf("Ponctuation : ;\n"); nb_colonne += yyleng; return pointverg; }
 ":"             { printf("Ponctuation : :\n"); nb_colonne += yyleng; return deuxpoint; }
@@ -104,10 +103,10 @@ COMM_ligne "%%".*
 
 {CHAINE}        { printf("Chaine de caracteres : %s\n", yytext); nb_colonne += yyleng;  return chaine; }
 
-{INTEGER}       { printf("Constante entiere : %s\n", yytext); nb_colonne += yyleng;  return integer; }
+{INTEGER}       { printf("Constante entiere : %s\n", yytext); nb_colonne += yyleng;  return cst; }
 {INTEGER_signe} { printf("Constante entiere signee : %s\n", yytext); nb_colonne += yyleng;  return integer_signe; }
 
-{FLOAT}         { printf("Constante Reelle : %s\n", yytext); nb_colonne += yyleng; return float_kw; }
+{FLOAT}         { printf("Constante Reelle : %s\n", yytext); nb_colonne += yyleng; return cst; }
 {FLOAT_signe}   { printf("Constante Reelle Signee : %s\n", yytext); nb_colonne += yyleng; return float_signe; }
 
 {IDF}           { valider_idf(yytext); nb_colonne += yyleng;  return idf; }
@@ -122,12 +121,4 @@ int yywrap() {
     return 1;
 }
 
-int main() {
-      int token;
-    printf("\n Lancement Lexical \n");
-     while ((token = yylex()) != 0) {
-        // rien à faire, les printf de chaque token sont déjà dans les règles Flex
-    }
-    printf("\n Fin Lexical \n");
-    return 0;
-}
+/* main program has been integrated into syntaxique.y */

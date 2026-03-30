@@ -1,70 +1,13 @@
-BeginProject M1_iv_2526;
-
+BeginProject M1_IV_2526;
 Setup :
-
-%% Déclaration 
-define a | b | c : integer;
-
-define compteur : integer = 10;
-
-define Tab : [integer ;20] ;
-
-const Pi : float = 3.14159;
-
-
+define a : integer;
 Run :
 {
-
-%% Affectations simples
-a <- 5;
-b <- (-5);
-
-
-moyenne <- 5.5;
-
-moyenne <- (+568.77);
-
-%% Affectation avec expression
-
-a <- (b + 2) / (5 - c + (-3));
-
-%% Condition
-if (a + 2 > b) then:
+if (a > 5) then:
 {
-    c <- a * 2;
-}
-else{
-    c <- c - 1;
+a = 3;
 }
 endIf;
-
-%% Boucle while
-loop while (a < 10)
-{
-    a <- a + 1;
 }
-endloop;
+EndProject ;
 
-%% Boucle for
-for i in 1 to 10 {
-    b <- b * i;
-}
-endfor;
-
-%% Input / Output
-in(UserName);
-out("Vous avez saisi: ", UserName);
-
-%% Expressions logiques
-if (a > b AND NON(c < 5)) then:
-{
-    out("Condition vraie");
-}
-else{
-    out("Condition fausse");
-}
-endIf;
-
-}
-
-EndProject;
