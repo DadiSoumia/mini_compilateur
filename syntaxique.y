@@ -24,6 +24,7 @@ void yyerror(const char *s);
 // priorités 
 %right affectation
 %left AND OR NON
+
 %left inf inf_egal sup sup_egal egal diff
 %left add sus
 %left mult Div
@@ -86,6 +87,8 @@ INSTRUCTION : AFFECTATION
 
 
 AFFECTATION : idf affectation EXPR pointverg
+    |  idf crochetO cst crochetF  affectation EXPR pointverg
+    |  idf crochetO idf crochetF  affectation EXPR pointverg
     ;
 
 
@@ -103,8 +106,8 @@ BOUCLE : loop while_kw parO CONDITION parF acolO INSTRUCTIONS acolF endloop poin
     | for_kw idf in_kw CONST to CONST acolO INSTRUCTIONS acolF endfor pointverg
     ;
 
-CONDITION : EXPR LOGIQUE EXPR
-    | EXPR
+CONDITION : 
+ EXPR
     ;
 
 EXPR : EXPR add EXPR
@@ -121,11 +124,15 @@ EXPR : EXPR add EXPR
     | idf
     | CONST
     | chaine
+    | TAB
+    | EXPR AND EXPR
+    | EXPR OR EXPR
+    | NON EXPR
     ;
-LOGIQUE : AND
-        | OR
-        | NON
-        ;
+
+TAB : idf crochetO EXPR crochetF
+
+
 
 
 

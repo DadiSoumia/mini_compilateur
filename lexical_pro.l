@@ -22,13 +22,13 @@ void valider_idf(char* txt) {
 
 lettre [a-zA-Z]
 chiffre [0-9]
-
+lettreM [a-zA-Z]
 INTEGER {chiffre}+
 FLOAT {chiffre}+"."{chiffre}+
 INTEGER_signe  \([+-]{chiffre}+\)
 FLOAT_signe \([+-]{chiffre}+"."{chiffre}+\)
 
-IDF {lettre}(_?[a-zA-Z0-9])*
+IDF {lettreM}(_?[a-z0-9])*
 CST INTEGER|FLOAT|INTEGER_signe|FLOAT_signe
 
 CHAINE \"([^\"\\]|\\.)*\"

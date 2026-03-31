@@ -1,13 +1,162 @@
-BeginProject M1_IV_2526;
+%% Programme de test ProLang - couvre toutes les constructions
+
+BeginProject M1_iv_2526;
+
 Setup :
-define a : integer;
+    %% Déclaration de variables simples
+
+    define x : integer;
+    define y : float;
+    define a | b | c : integer;
+
+    %% Déclaration avec initialisation
+    define compteur : integer = 0;
+    define moyenne : float = 5.034;
+    define mo: float = (-5.034);
+     define v: float = (+5.034);
+    %% Déclaration de tableau
+    define tab : [integer;20] ;
+
+    %% Déclaration de constantes
+
+    const pi : float = 3.14159;
+    const max : integer = 100;
+
+
 Run :
 {
-if (a > 5) then:
-{
-a = 3;
-}
-endIf;
-}
-EndProject ;
+    //* Bloc d'instructions de test *//
 
+    %% Affectation simple
+    x <- 10;
+    y <- 3.14;
+
+    %% Affectation avec expression arithmétique
+    a <- x + 5;
+    b <- a * 2;
+    c <- (b - a) / 2;
+    B[5]  <- (H+ 2) / (5 - b + (-3)) ;
+
+    %% Affectation tableau
+    tab[0] <- 42;
+    tab[1] <- x + 1;
+
+    %% Condition if-else
+    if (x > 5) then:
+    {
+        a <- x + 1;
+    } else {
+        a <- x - 1;
+    } endIf;
+
+    %% Condition if sans else
+    if (x == 10) then:
+    {
+        compteur <- compteur + 1;
+    } endIf;
+
+     %% Condition if simbriquée
+    if (x == 10) then:
+    {
+        compteur <- compteur + 1;
+          if (x == 10) then:
+          {
+           compteur <- compteur + 1;
+          } endIf;
+           if (x > 5) then:
+             {
+              a <- x + 1;
+             }
+             else {
+               a <- x - 1;
+                } endIf;
+    } endIf;
+
+
+    %% Boucle while
+    loop while (compteur < max)
+    {
+        compteur <- compteur + 1;
+    } endloop;
+
+    %% Boucles while imbriquées
+    loop while (i < 5)
+    {
+        j <- 0;
+
+        loop while (j < 3)
+        {
+            tab[i] <- tab[i] + tab[j] ;
+            j <- j + 1;
+        } endloop;
+
+        i <- i + 1;
+    } endloop;
+    
+
+
+    %% Boucle for
+    for i in 1 to 10 {
+         a <- x - 1;
+        tab[i] <- i * 2 ;
+    } endfor;
+   
+        %% Boucles for imbriquées
+    for i in 1 to 5 {
+        
+        for j in 1 to 3 {
+            tab[i] <- i * j;
+        } endfor;
+
+    } endfor;
+
+   %% for avec while interne
+for i in 1 to 4 {
+
+    j <- 0;
+
+    loop while (j < 2)
+    {
+        tab[i] <- i + j;
+        j <- j + 1;
+    } endloop;
+
+} endfor;
+
+
+    %% Expressions logiques
+    if (((a > 0) AND (b < 100)) OR ((a > 0) AND (b < 100))) then:
+    {
+        c <- 1;
+    } else {
+        c <- 0;
+    } endIf;
+
+    if ((a == 0) OR (b == 0)) then:
+    {
+        moyenne <- 0.0;
+    } endIf;
+
+    if( NON(x == 0)) then:
+    {
+        moyenne <- y / x;
+    } endIf;
+
+    
+    %% Boucles imbriquées
+    loop while (a < 10)
+    {
+        for j in 1 to 5 {
+            tab[j] <- a + j;
+        } endfor;
+        a <- a + 1;
+    } endloop;
+
+    %% I/O
+    in(x);
+    out("La valeur de x est : ", x);
+    out("Résultat : ", moyenne);
+
+}
+
+EndProject ;
