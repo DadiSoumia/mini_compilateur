@@ -16,21 +16,18 @@ void yyerror(const char *s);
 
 %union {
     char* str;
+    struct {
+        char type[20];
+        char val[50];
+    } expr;
 }
 
-%type <str> EXPR TYPE CONST
+%type <str> TYPE CONST LISTIDF TAB
+%type <expr> EXPR
 /*
     char* typename;
     char* name;
-    int array = 0;
-    int opencv = 0;
-    int deb_else=0;
-
-    int qc=1;
-    int Fin_if=0;
-    char tmp [20];
-%}
- */
+*/
 
 
 %token begin endProject setup run define const_kw
@@ -70,49 +67,99 @@ DEC : VAR_DEC
 // Déclaration d'une Variable simple ou en Liste sans conflit
 VAR_DEC : define idf deuxpoint TYPE pointverg
         {
-            if (existe($2))
-                printf("Erreur semantique: double declaration de %s\n", $2);
-            else
-                inserer($2, $4, 0);
+            if (doubleDeclaration($2)) {
+                printf("Erreur SYMENTIQUE: Double declaration de l'identifiant '%s', a la ligne '%d' , et la colonne '%d' : \n", $2, nb_ligne, nb_colonne);
+                exit(EXIT_FAILURE);
+            } else {
+                InsererSymbol(table, $2, $4, "", 0);
+            }
         }
         | define idf deuxpoint TYPE egg CONST pointverg
         {
-            if (existe($2))
-                printf("Erreur semantique: double declaration de %s\n", $2);
-            else
-                inserer($2, $4, $6);
+            if (doubleDeclaration($2)) {
+                printf("Erreur SYMENTIQUE: Double declaration de l'identifiant '%s', a la ligne '%d' , et la colonne '%d' : \n", $2, nb_ligne, nb_colonne);
+                exit(EXIT_FAILURE);
+            } else {
+                InsererSymbol(table, $2, $4, $6, 0); // 0 is variable
+            }
         }
         | define LISTIDF deuxpoint TYPE pointverg
+        {
+            char *list = strdup($2);
+            char *token = strtok(list, "|");
+            while(token != NULL) {
+                if (doubleDeclaration(token)) {
+                    printf("Erreur SYMENTIQUE: Double declaration de l'identifiant '%s', a la ligne '%d' , et la colonne '%d' : \n", token, nb_ligne, nb_colonne);
+                    exit(EXIT_FAILURE);
+                } else {
+                    InsererSymbol(table, token, $4, "", 0);
+                }
+                token = strtok(NULL, "|");
+            }
+            free(list);
+        }
         | define LISTIDF deuxpoint TYPE egg CONST pointverg
+        {
+            char *list = strdup($2);
+            char *token = strtok(list, "|");
+            while(token != NULL) {
+                if (doubleDeclaration(token)) {
+                    printf("Erreur SYMENTIQUE: Double declaration de l'identifiant '%s', a la ligne '%d' , et la colonne '%d' : \n", token, nb_ligne, nb_colonne);
+                    exit(EXIT_FAILURE);
+                } else {
+                    InsererSymbol(table, token, $4, $6, 0); // 0 is variable
+                }
+                token = strtok(NULL, "|");
+            }
+            free(list);
+        }
         ;
        
 // Déclaration d'un Tableau 
 DECTABLE : define idf deuxpoint crochetO TYPE pointverg CONST crochetF pointverg
+        {
+            if (doubleDeclaration($2)) {
+                printf("Erreur SYMENTIQUE: Double declaration de l'identifiant '%s', a la ligne '%d' , et la colonne '%d' : \n", $2, nb_ligne, nb_colonne);
+                exit(EXIT_FAILURE);
+            } else {
+                InsererSymbol(table, $2, $5, "", 2);
+            }
+        }
     ;
 
 // Déclaration d'une Constante 
 DECCONST : const_kw idf deuxpoint TYPE egg CONST pointverg
         {
-            if (existe($2))
-                printf("Erreur semantique: double declaration de %s\n", $2);
-            else
-                inserer($2, $4, 1); 
+            if (doubleDeclaration($2)) {
+                printf("Erreur SYMENTIQUE: Double declaration de l'identifiant '%s', a la ligne '%d' , et la colonne '%d' : \n", $2, nb_ligne, nb_colonne);
+                exit(EXIT_FAILURE);
+            } else {
+                InsererSymbol(table, $2, $4, $6, 1);
+            }
         }
     ; 
 
-CONST : cst
-        | float_signe 
-        | integer_signe 
+CONST : cst { $$ = strdup(yytext); }
+        | float_signe { $$ = strdup(yytext); }
+        | integer_signe { $$ = strdup(yytext); }
         ;
 
 
-TYPE : integer 
-        | float_kw
+TYPE : integer { $$ = "int"; }
+        | float_kw { $$ = "float"; }
         ;
 
 // Déclaration multiple de variables 
 LISTIDF : idf barre idf
+        {
+            $$ = malloc(strlen($1) + strlen($3) + 2);
+            sprintf($$, "%s|%s", $1, $3);
+        }
         | idf barre LISTIDF
+        {
+            $$ = malloc(strlen($1) + strlen($3) + 2);
+            sprintf($$, "%s|%s", $1, $3);
+        }
         ;
 
 INSTRUCTIONS : INSTRUCTION INSTRUCTIONS
@@ -129,19 +176,48 @@ INSTRUCTION : AFFECTATION
 
 AFFECTATION : idf affectation EXPR pointverg
         {
-            if (!existe($1))
-                printf("Erreur semantique: %s est non declaree\n", $1);
-            else if (est_constante($1))
-                printf("Erreur semantique: modification d'une constante\n");
+            if (!checkdeclaration($1)) {
+                printf("Erreur SYMENTIQUE: Non declaration de l'identifiant '%s', a la ligne '%d', et la colonne '%d' : \n", $1, nb_ligne, nb_colonne);
+                exit(EXIT_FAILURE);
+            } else {
+                InfoSymboles *ent = Rechercher(table, $1);
+                if (ent->Etat == 1) {
+                    printf("Erreur SYMENTIQUE: Modification d'une constante '%s', a la ligne '%d' , et la colonne '%d' : \n", $1, nb_ligne, nb_colonne);
+                    exit(EXIT_FAILURE);
+                }
+                if (strcmp(ent->Type, "int") == 0 && strcmp($3.type, "float") == 0) {
+                    printf("Erreur SYMENTIQUE: Incompatibilite de type lors de l'affectation a '%s' (un int ne peut pas recevoir un float) a la ligne '%d' et la colonne '%d' : \n", $1, nb_ligne, nb_colonne);
+                    exit(EXIT_FAILURE);
+                }
+            }
         }
         |  idf crochetO cst crochetF affectation EXPR pointverg
-        |  idf crochetO idf crochetF  affectation EXPR 
         {
-            if (!existe($1))
-                printf("Erreur semantique: %s tableau non declare\n", $1);
-
-            if (!existe($3))
-                printf("Erreur semantique: %s est non declare\n", $3);
+            if (!checkdeclaration($1)) {
+                printf("Erreur SYMENTIQUE: Non declaration du tableau '%s', a la ligne '%d', et la colonne '%d' : \n", $1, nb_ligne, nb_colonne);
+                exit(EXIT_FAILURE);
+            }
+            InfoSymboles *ent = Rechercher(table, $1);
+            if (strcmp(ent->Type, "int") == 0 && strcmp($6.type, "float") == 0) {
+                printf("Erreur SYMENTIQUE: Incompatibilite de type lors de l'affectation a '%s' (un tableau d'int ne peut pas recevoir un float) a la ligne '%d' et la colonne '%d' : \n", $1, nb_ligne, nb_colonne);
+                exit(EXIT_FAILURE);
+            }
+        }
+        |  idf crochetO idf crochetF  affectation EXPR pointverg
+        {
+            if (!checkdeclaration($1)) {
+                printf("Erreur Semantique: %s tableau non declare\n", $1);
+                exit(1);
+            }
+            if (!checkdeclaration($3)) {
+                printf("Erreur SYMENTIQUE: Non declaration de l'identifiant '%s', a la ligne '%d', et la colonne '%d' : \n", $3, nb_ligne, nb_colonne);
+                exit(EXIT_FAILURE);
+            }
+            InfoSymboles *ent = Rechercher(table, $1);
+            if (strcmp(ent->Type, "int") == 0 && strcmp($6.type, "float") == 0) {
+                printf("Erreur SYMENTIQUE: Incompatibilite de type lors de l'affectation a '%s' (un tableau d'int ne peut pas recevoir un float) a la ligne '%d' et la colonne '%d' : \n", $1, nb_ligne, nb_colonne);
+                exit(EXIT_FAILURE);
+            }
         }
         ;
 
@@ -158,16 +234,20 @@ LECTURE_ECRITURE : out parO chaine virgule EXPR parF pointverg
     | out parO chaine parF pointverg
     | in_kw parO idf parF pointverg
     {
-        if (!existe($3))
-            printf("Erreur semantique : variable non declaree\n");
+        if (!checkdeclaration($3)) {
+            printf("Erreur SYMENTIQUE: Non declaration de l'identifiant '%s', a la ligne '%d', et la colonne '%d' : \n", $3, nb_ligne, nb_colonne);
+            exit(EXIT_FAILURE);
+        }
     }
     ;
 
 BOUCLE : loop while_kw parO CONDITION parF acolO INSTRUCTIONS acolF endloop pointverg
         | for_kw idf in_kw CONST to CONST acolO INSTRUCTIONS acolF endfor pointverg
         {
-            if (!existe($3))
-                printf("Erreur semantique : variable non declaree\n");
+            if (!checkdeclaration($2)) {
+                printf("Erreur SYMENTIQUE: Non declaration de l'identifiant '%s', a la ligne '%d', et la colonne '%d' : \n", $2, nb_ligne, nb_colonne);
+                exit(EXIT_FAILURE);
+            }
         }
         ;
 
@@ -176,29 +256,81 @@ CONDITION :
         ;
 
 EXPR : EXPR add EXPR
+    {
+        if (strcmp($1.type, "float") == 0 || strcmp($3.type, "float") == 0) strcpy($$.type, "float");
+        else strcpy($$.type, "int");
+        strcpy($$.val, "");
+    }
     | EXPR sus EXPR     
+    {
+        if (strcmp($1.type, "float") == 0 || strcmp($3.type, "float") == 0) strcpy($$.type, "float");
+        else strcpy($$.type, "int");
+        strcpy($$.val, "");
+    }
     | EXPR mult EXPR
+    {
+        if (strcmp($1.type, "float") == 0 || strcmp($3.type, "float") == 0) strcpy($$.type, "float");
+        else strcpy($$.type, "int");
+        strcpy($$.val, "");
+    }
     | EXPR Div EXPR
     {
-        // divion par zero
+        if (strcmp($3.val, "0") == 0 || strcmp($3.val, "0.0") == 0 || strcmp($3.val, "(+0)") == 0) {
+            printf("Erreur SYMENTIQUE: Division par zero detectee a la ligne '%d' et la colonne '%d' : \n", nb_ligne, nb_colonne);
+            exit(EXIT_FAILURE);
+        }
+        if (strcmp($1.type, "float") == 0 || strcmp($3.type, "float") == 0) strcpy($$.type, "float");
+        else strcpy($$.type, "int");
+        strcpy($$.val, "");
     }
-    | EXPR sup_egal EXPR
-    | EXPR inf_egal EXPR
-    | EXPR egal EXPR
-    | EXPR diff EXPR
-    | EXPR sup EXPR
-    | EXPR inf EXPR
-    | parO EXPR parF
+    | EXPR sup_egal EXPR { strcpy($$.type, ""); }
+    | EXPR inf_egal EXPR { strcpy($$.type, ""); }
+    | EXPR egal EXPR { strcpy($$.type, ""); }
+    | EXPR diff EXPR { strcpy($$.type, ""); }
+    | EXPR sup EXPR { strcpy($$.type, ""); }
+    | EXPR inf EXPR { strcpy($$.type, ""); }
+    | parO EXPR parF { $$ = $2; }
     | idf
+    {
+        if (!checkdeclaration($1)) {
+            printf("Erreur SYMENTIQUE: Non declaration de l'identifiant '%s', a la ligne '%d', et la colonne '%d' : \n", $1, nb_ligne, nb_colonne);
+            exit(EXIT_FAILURE);
+        }
+        InfoSymboles *ent = Rechercher(table, $1);
+        if(ent) {
+            strcpy($$.type, ent->Type);
+            strcpy($$.val, ent->Val);
+        } else {
+            strcpy($$.type, "");
+            strcpy($$.val, "");
+        }
+    }
     | CONST
-    | chaine
-    | TAB
-    | EXPR AND EXPR
-    | EXPR OR EXPR
-    | NON EXPR
+    {
+        if (strchr($1, '.') != NULL) strcpy($$.type, "float");
+        else strcpy($$.type, "int");
+        strcpy($$.val, $1);
+    }
+    | chaine { strcpy($$.type, "chaine"); strcpy($$.val, ""); }
+    | TAB { strcpy($$.type, $1); strcpy($$.val, ""); }
+    | EXPR AND EXPR { strcpy($$.type, ""); strcpy($$.val, ""); }
+    | EXPR OR EXPR { strcpy($$.type, ""); strcpy($$.val, ""); }
+    | NON EXPR { strcpy($$.type, ""); strcpy($$.val, ""); }
     ;
 
 TAB : idf crochetO EXPR crochetF
+    {
+        if (!checkdeclaration($1)) {
+            printf("Erreur Semantique : tableau %s est non declare\n", $1);
+            exit(1);
+        }
+        InfoSymboles *ent = Rechercher(table, $1);
+        if(ent) {
+            $$ = ent->Type;
+        } else {
+            $$ = "";
+        }
+    }
 
 
 
@@ -211,9 +343,11 @@ void yyerror(const char *msg) {
 }
 
 int main() {
+    table = createHashTable(50);
     printf("Lancement Analyse Syntaxique\n");
     if (yyparse() == 0) {
         printf("Analyse syntaxique correcte\n");
+        AfficherTableHG(table);
     }
     return 0;
 }

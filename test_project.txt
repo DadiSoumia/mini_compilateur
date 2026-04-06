@@ -5,19 +5,22 @@ BeginProject M1_iv_2526;
 Setup :
     %% Déclaration de variables simples
 
-    define x : integer;
+    define x | H | i | j: integer;
     define y : float;
-    define a | b | c : integer;
-
+    define a | b | c : integer; 
+  
     %% Déclaration avec initialisation
     define compteur : integer = 0;
     define moyenne : float = 5.034;
     define mo: float = (-5.034);
-     define v: float = (+5.034);
+    define v: float = (+5.034);
+
     %% Déclaration de tableau
+    define B : [integer;10] ; 
     define tab : [integer;20] ;
 
     %% Déclaration de constantes
+
 
     const pi : float = 3.14159;
     const max : integer = 100;
@@ -40,13 +43,13 @@ Run :
     %% Affectation tableau
     tab[0] <- 42;
     tab[1] <- x + 1;
-
+    tab[c] <- tab[c] + tab[c] ;
     %% Condition if-else
     if (x > 5) then:
     {
-        a <- x + 1;
+        y <- 6;
     } else {
-        a <- x - 1;
+        a <- x / 9;
     } endIf;
 
     %% Condition if sans else
@@ -77,20 +80,21 @@ Run :
     loop while (compteur < max)
     {
         compteur <- compteur + 1;
+   
     } endloop;
 
     %% Boucles while imbriquées
-    loop while (i < 5)
+    loop while (b < 5)
     {
         j <- 0;
 
-        loop while (j < 3)
+        loop while (c < 3)
         {
-            tab[i] <- tab[i] + tab[j] ;
-            j <- j + 1;
+            
+            c <- c + 1;
         } endloop;
 
-        i <- i + 1;
+        b <- b + 1;
     } endloop;
     
 

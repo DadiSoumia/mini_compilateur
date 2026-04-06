@@ -101,15 +101,15 @@ COMM_ligne "%%".*
 "{"             { printf("Accolade Ouvrante : {\n"); nb_colonne += yyleng; return acolO; }
 "}"             { printf("Accolade Fermante : }\n"); nb_colonne += yyleng; return acolF; }
 
-{CHAINE}        { printf("Chaine de caracteres : %s\n", yytext); nb_colonne += yyleng;  return chaine; }
+{CHAINE}        { printf("Chaine de caracteres : %s\n", yytext); nb_colonne += yyleng; yylval.str = strdup(yytext); return chaine; }
 
-{INTEGER}       { printf("Constante entiere : %s\n", yytext); nb_colonne += yyleng;  return cst; }
-{INTEGER_signe} { printf("Constante entiere signee : %s\n", yytext); nb_colonne += yyleng;  return integer_signe; }
+{INTEGER}       { printf("Constante entiere : %s\n", yytext); nb_colonne += yyleng; yylval.str = strdup(yytext); return cst; }
+{INTEGER_signe} { printf("Constante entiere signee : %s\n", yytext); nb_colonne += yyleng; yylval.str = strdup(yytext); return integer_signe; }
 
-{FLOAT}         { printf("Constante Reelle : %s\n", yytext); nb_colonne += yyleng; return cst; }
-{FLOAT_signe}   { printf("Constante Reelle Signee : %s\n", yytext); nb_colonne += yyleng; return float_signe; }
+{FLOAT}         { printf("Constante Reelle : %s\n", yytext); nb_colonne += yyleng; yylval.str = strdup(yytext); return cst; }
+{FLOAT_signe}   { printf("Constante Reelle Signee : %s\n", yytext); nb_colonne += yyleng; yylval.str = strdup(yytext); return float_signe; }
 
-{IDF}           { valider_idf(yytext); nb_colonne += yyleng;  return idf; }
+{IDF}           { valider_idf(yytext); nb_colonne += yyleng; yylval.str = strdup(yytext); return idf; }
 
 
 
