@@ -70,7 +70,8 @@ COMM_ligne "%%".*
 "to"            { printf("Mot-cle : to\n"); nb_colonne += yyleng; return to; }
 "endfor"        { printf("Mot-cle : endfor\n"); nb_colonne += yyleng; return endfor; }
 
-"out"           { printf("Mot-cle (Ecriture) : out\n"); nb_colonne += yyleng; return out; }
+"output"           { printf("Mot-cle (Ecriture) : out\n"); nb_colonne += yyleng; return out; }
+"input"            { printf("Mot-cle : in\n"); nb_colonne += yyleng; return in_put; }
 
 "AND"           { printf("Op. Logique : AND\n"); nb_colonne += yyleng; return AND; }
 "OR"            { printf("Op. Logique : OR\n"); nb_colonne += yyleng; return OR; }

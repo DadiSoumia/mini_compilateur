@@ -1,0 +1,22 @@
+BeginProject Errorest;
+
+Setup :
+    define a : integer;
+    define a : float;      %% ERROR: Double declaration of 'a'
+    
+    define x : integer;
+    define y : float;
+    const pi : float = 3.14;
+
+Run :
+{
+    b <- 10;               %% ERROR: 'b' is not declared
+    
+    x <- 5.5;              %% ERROR: Incompatibilite de type (float to int)
+    
+    y <- 10 / 0;           %% ERROR: Division par zero
+    
+    pi <- 4.0;             %% ERROR: Modification d'une constante
+}
+
+EndProject ;

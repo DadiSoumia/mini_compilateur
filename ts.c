@@ -207,11 +207,6 @@ void supprimer(TableHashage *tableHash, char *Nom)
     printf("Symbole '%s' introuvable dans la table.\n", Nom);
 }
 
-int doubleDeclaration(char *nom)
-{
-    return (Rechercher(table, nom) != NULL);
-}
-
 int checkdeclaration(char *idf)
 {
     return (Rechercher(table, idf) != NULL);
@@ -245,4 +240,20 @@ void MettreAJourSymbol(TableHashage *Tabhashage, char *Nom, char *Val, char *Typ
 void setType(char *type)
 {
     Type = type;
-}
+}
+
+void libererTable(TableHashage *tableHash)
+{
+    for (int i = 0; i < tableHash->taille; i++)
+    {
+        InfoSymboles *courant = tableHash->table[i];
+        while (courant != NULL)
+        {
+            InfoSymboles *temp = courant;
+            courant = courant->suivant;
+            free(temp);
+        }
+    }
+    free(tableHash->table);
+    free(tableHash);
+}

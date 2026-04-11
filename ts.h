@@ -17,7 +17,7 @@ typedef struct InfoSymboles
 typedef struct
 {
     InfoSymboles **table;
-    
+
     int taille;
     int cpt;
 } TableHashage;
@@ -32,9 +32,7 @@ void InsererSymbol(TableHashage *Tabhashage, char *Nom, char *Type, char *Val, i
 void AfficherTableHG(TableHashage *tableHash);
 void supprimer(TableHashage *tableHash, char *Nom);
 void MettreAJourSymbol(TableHashage *Tabhashage, char *Nom, char *Val, char *Type, int Etat);
-int doubleDeclaration(char *nom);
 int checkdeclaration(char *idf);
-void setType(char *type);
 
 extern TableHashage *table;
 extern int nb_ligne;

@@ -1,49 +1,44 @@
-%% Programme de test ProLang - couvre toutes les constructions
-
 BeginProject M1_iv_2526;
 
 Setup :
-    %% Déclaration de variables simples
 
-    define x | H | i | j: integer;
+    define x | c | H | i | j: integer;
     define y : float;
-    define a | b | c : integer; 
-  
-    %% Déclaration avec initialisation
-    define compteur : integer = 0;
-    define moyenne : float = 5.034;
-    define mo: float = (-5.034);
-    define v: float = (+5.034);
 
-    %% Déclaration de tableau
-    define B : [integer;10] ; 
+    
+    define compteur : integer = 0;
+    define moyenne : float = 5.34;
+    define mo: float = (-456.04);
+    define a: float = (+6.0408);
+    define b: float = 9.03;
+   
+    define B  : [integer;10] ; 
     define tab : [integer;20] ;
 
-    %% Déclaration de constantes
-
-
+   
     const pi : float = 3.14159;
     const max : integer = 100;
 
 
 Run :
 {
-    //* Bloc d'instructions de test *//
-
-    %% Affectation simple
-    x <- 10;
-    y <- 3.14;
-
+  
     %% Affectation avec expression arithmétique
     a <- x + 5;
     b <- a * 2;
-    c <- (b - a) / 2;
-    B[5]  <- (H+ 2) / (5 - b + (-3)) ;
+    c <-2;
+    B[5]  <- (H+ 2) +  (5  + (-3)) ;
 
     %% Affectation tableau
     tab[0] <- 42;
     tab[1] <- x + 1;
     tab[c] <- tab[c] + tab[c] ;
+
+     
+    %% Affectation simple
+    x <- 10;
+    y <- 3.14;
+
     %% Condition if-else
     if (x > 5) then:
     {
@@ -84,6 +79,7 @@ Run :
     } endloop;
 
     %% Boucles while imbriquées
+    
     loop while (b < 5)
     {
         j <- 0;
@@ -117,7 +113,7 @@ Run :
    %% for avec while interne
 for i in 1 to 4 {
 
-    j <- 0;
+  
 
     loop while (j < 2)
     {
@@ -147,19 +143,13 @@ for i in 1 to 4 {
     } endIf;
 
     
-    %% Boucles imbriquées
-    loop while (a < 10)
-    {
-        for j in 1 to 5 {
-            tab[j] <- a + j;
-        } endfor;
-        a <- a + 1;
-    } endloop;
+   
 
     %% I/O
-    in(x);
-    out("La valeur de x est : ", x);
-    out("Résultat : ", moyenne);
+    input(x);
+    output("La valeur de x est : ", x);
+    output("Résultat : ", moyenne);
+
 
 }
 
