@@ -45,58 +45,75 @@
      run = 261,
      define = 262,
      const_kw = 263,
-     cst = 264,
-     integer = 265,
-     float_kw = 266,
-     float_signe = 267,
-     integer_signe = 268,
-     if_kw = 269,
-     then = 270,
-     else_kw = 271,
-     endIf = 272,
-     loop = 273,
-     while_kw = 274,
-     endloop = 275,
-     for_kw = 276,
-     in_kw = 277,
-     to = 278,
-     endfor = 279,
-     out = 280,
-     affectation = 281,
-     add = 282,
-     sus = 283,
-     mult = 284,
-     Div = 285,
-     AND = 286,
-     OR = 287,
-     NON = 288,
-     sup_egal = 289,
-     inf_egal = 290,
-     egal = 291,
-     diff = 292,
-     sup = 293,
-     inf = 294,
-     pointverg = 295,
-     deuxpoint = 296,
-     barre = 297,
-     virgule = 298,
-     crochetO = 299,
-     crochetF = 300,
-     parO = 301,
-     parF = 302,
-     acolO = 303,
-     acolF = 304,
-     egg = 305,
-     chaine = 306,
-     idf = 307,
-     erreur = 308
+     integer = 264,
+     float_kw = 265,
+     if_kw = 266,
+     then = 267,
+     else_kw = 268,
+     endIf = 269,
+     loop = 270,
+     while_kw = 271,
+     endloop = 272,
+     for_kw = 273,
+     in_kw = 274,
+     to = 275,
+     endfor = 276,
+     out = 277,
+     in_put = 278,
+     affectation = 279,
+     add = 280,
+     sus = 281,
+     mult = 282,
+     Div = 283,
+     AND = 284,
+     OR = 285,
+     NON = 286,
+     sup_egal = 287,
+     inf_egal = 288,
+     egal = 289,
+     diff = 290,
+     sup = 291,
+     inf = 292,
+     pointverg = 293,
+     deuxpoint = 294,
+     barre = 295,
+     virgule = 296,
+     crochetO = 297,
+     crochetF = 298,
+     parO = 299,
+     parF = 300,
+     acolO = 301,
+     acolF = 302,
+     egg = 303,
+     erreur = 304,
+     idf = 305,
+     cst = 306,
+     float_signe = 307,
+     integer_signe = 308,
+     chaine = 309
    };
 #endif
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+typedef union YYSTYPE
+{
+
+/* Line 1676 of yacc.c  */
+#line 23 "syntaxique.y"
+
+    char* str;   // Pour transporter des noms d'identifiants ou des types
+    struct {
+        char type[20]; // Pour stocker le type d'une expression (int/float)
+        char val[50];  // Pour stocker la valeur textuelle d'une expression
+    } expr;
+
+
+
+/* Line 1676 of yacc.c  */
+#line 116 "syntaxique.tab.h"
+} YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "ts.h"
+#include "quad.h"
 
+int temp_var_count = 0; // Compteur pour les variables temporaires des quadruplets
 
 extern int nb_ligne;
 extern int nb_colonne;
@@ -26,12 +28,9 @@ int nb_erreur_sem = 0; // Compteur d'erreurs semantiques
     } expr;
 }
 
-%type <str> TYPE CONST LISTIDF TAB
+%type <str> TYPE CONST LISTIDF
+%type <expr> TAB
 %type <expr> EXPR
-/*
-    char* typename;
-    char* name;
-*/
 
 
 %token begin endProject setup run define const_kw
@@ -209,6 +208,7 @@ AFFECTATION : idf affectation EXPR pointverg
                 }
                 if (!has_error) {
                     MettreAJourSymbol(table, $1, $3.val, NULL, ent->Etat);
+                    quadr("=", $3.val, "", $1);
                 }
             }
         }
@@ -234,6 +234,9 @@ AFFECTATION : idf affectation EXPR pointverg
                 }
                 if (!has_error) {
                     MettreAJourSymbol(table, $1, $6.val, NULL, ent->Etat);
+                    char tmp_arr[50];
+                    sprintf(tmp_arr, "%s[%s]", $1, $3);
+                    quadr("=", $6.val, "", tmp_arr);
                 }
             }
         }
@@ -262,6 +265,9 @@ AFFECTATION : idf affectation EXPR pointverg
                 }
                 if (!has_error) {
                     MettreAJourSymbol(table, $1, $6.val, NULL, ent->Etat);
+                    char tmp_arr[50];
+                    sprintf(tmp_arr, "%s[%s]", $1, $3);
+                    quadr("=", $6.val, "", tmp_arr);
                 }
             }
         }
@@ -307,21 +313,24 @@ CONDITION :
 
 EXPR : EXPR add EXPR
     {
-        if (strcmp($1.type, "float") == 0 || strcmp($3.type, "float") == 0) strcpy($$.type, "float");
+        if (strcmp($1.type, "float") == 0 || strcmp($3.type, "float") == 0) strcpy($$.type, "float");    
         else strcpy($$.type, "int");
-        strcpy($$.val, "");
+        sprintf($$.val, "T%d", temp_var_count++);
+        quadr("+", $1.val, $3.val, $$.val);
     }
     | EXPR sus EXPR     
     {
         if (strcmp($1.type, "float") == 0 || strcmp($3.type, "float") == 0) strcpy($$.type, "float");
         else strcpy($$.type, "int");
-        strcpy($$.val, "");
+        sprintf($$.val, "T%d", temp_var_count++);
+        quadr("-", $1.val, $3.val, $$.val);
     }
     | EXPR mult EXPR
     {
         if (strcmp($1.type, "float") == 0 || strcmp($3.type, "float") == 0) strcpy($$.type, "float");
         else strcpy($$.type, "int");
-        strcpy($$.val, "");
+        sprintf($$.val, "T%d", temp_var_count++);
+        quadr("*", $1.val, $3.val, $$.val);
     }
     | EXPR Div EXPR
     {
@@ -331,15 +340,16 @@ EXPR : EXPR add EXPR
         }
         if (strcmp($1.type, "float") == 0 || strcmp($3.type, "float") == 0) strcpy($$.type, "float");
         else strcpy($$.type, "int");
-        strcpy($$.val, "");
+        sprintf($$.val, "T%d", temp_var_count++);
+        quadr("/", $1.val, $3.val, $$.val);
     }
 
-    | EXPR sup_egal EXPR { strcpy($$.type, ""); }
-    | EXPR inf_egal EXPR { strcpy($$.type, ""); }
-    | EXPR egal EXPR { strcpy($$.type, ""); }
-    | EXPR diff EXPR { strcpy($$.type, ""); }
-    | EXPR sup EXPR { strcpy($$.type, ""); }
-    | EXPR inf EXPR { strcpy($$.type, ""); }
+    | EXPR sup_egal EXPR { strcpy($$.type, "int"); sprintf($$.val, "T%d", temp_var_count++); quadC(2, $1.val, $3.val, $$.val); }
+    | EXPR inf_egal EXPR { strcpy($$.type, "int"); sprintf($$.val, "T%d", temp_var_count++); quadC(4, $1.val, $3.val, $$.val); }
+    | EXPR egal EXPR     { strcpy($$.type, "int"); sprintf($$.val, "T%d", temp_var_count++); quadC(5, $1.val, $3.val, $$.val); }
+    | EXPR diff EXPR     { strcpy($$.type, "int"); sprintf($$.val, "T%d", temp_var_count++); quadC(6, $1.val, $3.val, $$.val); }
+    | EXPR sup EXPR      { strcpy($$.type, "int"); sprintf($$.val, "T%d", temp_var_count++); quadC(1, $1.val, $3.val, $$.val); }
+    | EXPR inf EXPR      { strcpy($$.type, "int"); sprintf($$.val, "T%d", temp_var_count++); quadC(3, $1.val, $3.val, $$.val); }
     | parO EXPR parF { $$ = $2; }
     | idf
     {
@@ -350,7 +360,7 @@ EXPR : EXPR add EXPR
         InfoSymboles *ent = Rechercher(table, $1);
         if(ent) {
             strcpy($$.type, ent->Type);
-            strcpy($$.val, ent->Val);
+            strcpy($$.val, $1);
         } else {
             strcpy($$.type, "");
             strcpy($$.val, "");
@@ -364,10 +374,10 @@ EXPR : EXPR add EXPR
     }
     | chaine { strcpy($$.type, "chaine"); strcpy($$.val, $1); }
 
-    | TAB { strcpy($$.type, $1); strcpy($$.val, ""); }
-    | EXPR AND EXPR { strcpy($$.type, ""); strcpy($$.val, ""); }
-    | EXPR OR EXPR { strcpy($$.type, ""); strcpy($$.val, ""); }
-    | NON EXPR { strcpy($$.type, ""); strcpy($$.val, ""); }
+    | TAB { strcpy($$.type, $1.type); strcpy($$.val, $1.val); }
+    | EXPR AND EXPR { strcpy($$.type, "int"); sprintf($$.val, "T%d", temp_var_count++); quadL(1, $1.val, $3.val, $$.val); }
+    | EXPR OR EXPR  { strcpy($$.type, "int"); sprintf($$.val, "T%d", temp_var_count++); quadL(2, $1.val, $3.val, $$.val); }
+    | NON EXPR      { strcpy($$.type, "int"); sprintf($$.val, "T%d", temp_var_count++); quadL(3, $2.val, "", $$.val); }
     ;
 
 TAB : idf crochetO EXPR crochetF
@@ -378,9 +388,11 @@ TAB : idf crochetO EXPR crochetF
         }
         InfoSymboles *ent = Rechercher(table, $1);
         if(ent) {
-            $$ = ent->Type;
+            strcpy($$.type, ent->Type);
+            sprintf($$.val, "%s[%s]", $1, $3.val);
         } else {
-            $$ = "";
+            strcpy($$.type, "");
+            strcpy($$.val, "");
         }
     }
 
@@ -405,6 +417,7 @@ int main() {
             printf("Analyse semantique terminee avec %d erreurs\n", nb_erreur_sem);
         }
         AfficherTableHG(table);
+        afficher_qdr();
     }
 
 
