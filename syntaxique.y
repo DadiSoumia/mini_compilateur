@@ -207,7 +207,9 @@ AFFECTATION : idf affectation EXPR pointverg
                     has_error = 1;
                 }
                 if (!has_error) {
-                    MettreAJourSymbol(table, $1, $3.val, NULL, ent->Etat);
+                    if ($3.val[0] != 'T') {
+                        MettreAJourSymbol(table, $1, $3.val, NULL, ent->Etat);
+                    }
                     quadr("=", $3.val, "", $1);
                 }
             }
@@ -233,7 +235,9 @@ AFFECTATION : idf affectation EXPR pointverg
                     has_error = 1;
                 }
                 if (!has_error) {
-                    MettreAJourSymbol(table, $1, $6.val, NULL, ent->Etat);
+                    if ($6.val[0] != 'T') {
+                        MettreAJourSymbol(table, $1, $6.val, NULL, ent->Etat);
+                    }
                     char tmp_arr[50];
                     sprintf(tmp_arr, "%s[%s]", $1, $3);
                     quadr("=", $6.val, "", tmp_arr);
@@ -264,7 +268,9 @@ AFFECTATION : idf affectation EXPR pointverg
                     has_error = 1;
                 }
                 if (!has_error) {
-                    MettreAJourSymbol(table, $1, $6.val, NULL, ent->Etat);
+                    if ($6.val[0] != 'T') {
+                        MettreAJourSymbol(table, $1, $6.val, NULL, ent->Etat);
+                    }
                     char tmp_arr[50];
                     sprintf(tmp_arr, "%s[%s]", $1, $3);
                     quadr("=", $6.val, "", tmp_arr);
@@ -417,7 +423,7 @@ int main() {
             printf("Analyse semantique terminee avec %d erreurs\n", nb_erreur_sem);
         }
         AfficherTableHG(table);
-        afficher_qdr();
+        //afficher_qdr();
     }
 
 

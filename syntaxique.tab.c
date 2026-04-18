@@ -520,10 +520,10 @@ static const yytype_uint16 yyrline[] =
 {
        0,    59,    59,    63,    64,    67,    68,    69,    73,    83,
       93,   110,   130,   143,   155,   156,   157,   162,   163,   167,
-     172,   179,   180,   184,   185,   186,   187,   191,   217,   245,
-     279,   280,   287,   288,   289,   299,   300,   311,   314,   321,
-     328,   335,   347,   348,   349,   350,   351,   352,   353,   354,
-     369,   375,   377,   378,   379,   380,   383
+     172,   179,   180,   184,   185,   186,   187,   191,   219,   249,
+     285,   286,   293,   294,   295,   305,   306,   317,   320,   327,
+     334,   341,   353,   354,   355,   356,   357,   358,   359,   360,
+     375,   381,   383,   384,   385,   386,   389
 };
 #endif
 
@@ -1715,7 +1715,9 @@ yyreduce:
                     has_error = 1;
                 }
                 if (!has_error) {
-                    MettreAJourSymbol(table, (yyvsp[(1) - (4)].str), (yyvsp[(3) - (4)].expr).val, NULL, ent->Etat);
+                    if ((yyvsp[(3) - (4)].expr).val[0] != 'T') {
+                        MettreAJourSymbol(table, (yyvsp[(1) - (4)].str), (yyvsp[(3) - (4)].expr).val, NULL, ent->Etat);
+                    }
                     quadr("=", (yyvsp[(3) - (4)].expr).val, "", (yyvsp[(1) - (4)].str));
                 }
             }
@@ -1725,7 +1727,7 @@ yyreduce:
   case 28:
 
 /* Line 1455 of yacc.c  */
-#line 218 "syntaxique.y"
+#line 220 "syntaxique.y"
     {
             if (!checkdeclaration((yyvsp[(1) - (7)].str))) {
                 printf("Erreur SYMENTIQUE: Non declaration du tableau '%s', a la ligne '%d', et la colonne '%d' : \n", (yyvsp[(1) - (7)].str), nb_ligne, nb_colonne);
@@ -1744,7 +1746,9 @@ yyreduce:
                     has_error = 1;
                 }
                 if (!has_error) {
-                    MettreAJourSymbol(table, (yyvsp[(1) - (7)].str), (yyvsp[(6) - (7)].expr).val, NULL, ent->Etat);
+                    if ((yyvsp[(6) - (7)].expr).val[0] != 'T') {
+                        MettreAJourSymbol(table, (yyvsp[(1) - (7)].str), (yyvsp[(6) - (7)].expr).val, NULL, ent->Etat);
+                    }
                     char tmp_arr[50];
                     sprintf(tmp_arr, "%s[%s]", (yyvsp[(1) - (7)].str), (yyvsp[(3) - (7)].str));
                     quadr("=", (yyvsp[(6) - (7)].expr).val, "", tmp_arr);
@@ -1756,7 +1760,7 @@ yyreduce:
   case 29:
 
 /* Line 1455 of yacc.c  */
-#line 246 "syntaxique.y"
+#line 250 "syntaxique.y"
     {
             if (!checkdeclaration((yyvsp[(1) - (7)].str))) {
                 printf("Erreur Semantique: %s tableau non declare\n", (yyvsp[(1) - (7)].str));
@@ -1778,7 +1782,9 @@ yyreduce:
                     has_error = 1;
                 }
                 if (!has_error) {
-                    MettreAJourSymbol(table, (yyvsp[(1) - (7)].str), (yyvsp[(6) - (7)].expr).val, NULL, ent->Etat);
+                    if ((yyvsp[(6) - (7)].expr).val[0] != 'T') {
+                        MettreAJourSymbol(table, (yyvsp[(1) - (7)].str), (yyvsp[(6) - (7)].expr).val, NULL, ent->Etat);
+                    }
                     char tmp_arr[50];
                     sprintf(tmp_arr, "%s[%s]", (yyvsp[(1) - (7)].str), (yyvsp[(3) - (7)].str));
                     quadr("=", (yyvsp[(6) - (7)].expr).val, "", tmp_arr);
@@ -1790,7 +1796,7 @@ yyreduce:
   case 31:
 
 /* Line 1455 of yacc.c  */
-#line 281 "syntaxique.y"
+#line 287 "syntaxique.y"
     {
     // bool type 
     ;}
@@ -1799,7 +1805,7 @@ yyreduce:
   case 34:
 
 /* Line 1455 of yacc.c  */
-#line 290 "syntaxique.y"
+#line 296 "syntaxique.y"
     {
         if (!checkdeclaration((yyvsp[(3) - (5)].str))) {
             printf("Erreur SYMENTIQUE: Non declaration de l'identifiant '%s', a la ligne '%d', et la colonne '%d' : \n", (yyvsp[(3) - (5)].str), nb_ligne, nb_colonne);
@@ -1811,7 +1817,7 @@ yyreduce:
   case 36:
 
 /* Line 1455 of yacc.c  */
-#line 301 "syntaxique.y"
+#line 307 "syntaxique.y"
     {
             if (!checkdeclaration((yyvsp[(2) - (11)].str))) {
                 printf("Erreur SYMENTIQUE: Non declaration de l'identifiant '%s', a la ligne '%d', et la colonne '%d' : \n", (yyvsp[(2) - (11)].str), nb_ligne, nb_colonne);
@@ -1823,7 +1829,7 @@ yyreduce:
   case 38:
 
 /* Line 1455 of yacc.c  */
-#line 315 "syntaxique.y"
+#line 321 "syntaxique.y"
     {
         if (strcmp((yyvsp[(1) - (3)].expr).type, "float") == 0 || strcmp((yyvsp[(3) - (3)].expr).type, "float") == 0) strcpy((yyval.expr).type, "float");    
         else strcpy((yyval.expr).type, "int");
@@ -1835,7 +1841,7 @@ yyreduce:
   case 39:
 
 /* Line 1455 of yacc.c  */
-#line 322 "syntaxique.y"
+#line 328 "syntaxique.y"
     {
         if (strcmp((yyvsp[(1) - (3)].expr).type, "float") == 0 || strcmp((yyvsp[(3) - (3)].expr).type, "float") == 0) strcpy((yyval.expr).type, "float");
         else strcpy((yyval.expr).type, "int");
@@ -1847,7 +1853,7 @@ yyreduce:
   case 40:
 
 /* Line 1455 of yacc.c  */
-#line 329 "syntaxique.y"
+#line 335 "syntaxique.y"
     {
         if (strcmp((yyvsp[(1) - (3)].expr).type, "float") == 0 || strcmp((yyvsp[(3) - (3)].expr).type, "float") == 0) strcpy((yyval.expr).type, "float");
         else strcpy((yyval.expr).type, "int");
@@ -1859,7 +1865,7 @@ yyreduce:
   case 41:
 
 /* Line 1455 of yacc.c  */
-#line 336 "syntaxique.y"
+#line 342 "syntaxique.y"
     {
         if (strcmp((yyvsp[(3) - (3)].expr).val, "0") == 0 || strcmp((yyvsp[(3) - (3)].expr).val, "0.0") == 0 || strcmp((yyvsp[(3) - (3)].expr).val, "(+0)") == 0) {
             printf("Erreur SYMENTIQUE: Division par zero detectee a la ligne '%d' et la colonne '%d' : \n", nb_ligne, nb_colonne);
@@ -1875,56 +1881,56 @@ yyreduce:
   case 42:
 
 /* Line 1455 of yacc.c  */
-#line 347 "syntaxique.y"
+#line 353 "syntaxique.y"
     { strcpy((yyval.expr).type, "int"); sprintf((yyval.expr).val, "T%d", temp_var_count++); quadC(2, (yyvsp[(1) - (3)].expr).val, (yyvsp[(3) - (3)].expr).val, (yyval.expr).val); ;}
     break;
 
   case 43:
 
 /* Line 1455 of yacc.c  */
-#line 348 "syntaxique.y"
+#line 354 "syntaxique.y"
     { strcpy((yyval.expr).type, "int"); sprintf((yyval.expr).val, "T%d", temp_var_count++); quadC(4, (yyvsp[(1) - (3)].expr).val, (yyvsp[(3) - (3)].expr).val, (yyval.expr).val); ;}
     break;
 
   case 44:
 
 /* Line 1455 of yacc.c  */
-#line 349 "syntaxique.y"
+#line 355 "syntaxique.y"
     { strcpy((yyval.expr).type, "int"); sprintf((yyval.expr).val, "T%d", temp_var_count++); quadC(5, (yyvsp[(1) - (3)].expr).val, (yyvsp[(3) - (3)].expr).val, (yyval.expr).val); ;}
     break;
 
   case 45:
 
 /* Line 1455 of yacc.c  */
-#line 350 "syntaxique.y"
+#line 356 "syntaxique.y"
     { strcpy((yyval.expr).type, "int"); sprintf((yyval.expr).val, "T%d", temp_var_count++); quadC(6, (yyvsp[(1) - (3)].expr).val, (yyvsp[(3) - (3)].expr).val, (yyval.expr).val); ;}
     break;
 
   case 46:
 
 /* Line 1455 of yacc.c  */
-#line 351 "syntaxique.y"
+#line 357 "syntaxique.y"
     { strcpy((yyval.expr).type, "int"); sprintf((yyval.expr).val, "T%d", temp_var_count++); quadC(1, (yyvsp[(1) - (3)].expr).val, (yyvsp[(3) - (3)].expr).val, (yyval.expr).val); ;}
     break;
 
   case 47:
 
 /* Line 1455 of yacc.c  */
-#line 352 "syntaxique.y"
+#line 358 "syntaxique.y"
     { strcpy((yyval.expr).type, "int"); sprintf((yyval.expr).val, "T%d", temp_var_count++); quadC(3, (yyvsp[(1) - (3)].expr).val, (yyvsp[(3) - (3)].expr).val, (yyval.expr).val); ;}
     break;
 
   case 48:
 
 /* Line 1455 of yacc.c  */
-#line 353 "syntaxique.y"
+#line 359 "syntaxique.y"
     { (yyval.expr) = (yyvsp[(2) - (3)].expr); ;}
     break;
 
   case 49:
 
 /* Line 1455 of yacc.c  */
-#line 355 "syntaxique.y"
+#line 361 "syntaxique.y"
     {
         if (!checkdeclaration((yyvsp[(1) - (1)].str))) {
             printf("Erreur SYMENTIQUE: Non declaration de l'identifiant '%s', a la ligne '%d', et la colonne '%d' : \n", (yyvsp[(1) - (1)].str), nb_ligne, nb_colonne);
@@ -1944,7 +1950,7 @@ yyreduce:
   case 50:
 
 /* Line 1455 of yacc.c  */
-#line 370 "syntaxique.y"
+#line 376 "syntaxique.y"
     {
         if (strchr((yyvsp[(1) - (1)].str), '.') != NULL) strcpy((yyval.expr).type, "float");
         else strcpy((yyval.expr).type, "int");
@@ -1955,42 +1961,42 @@ yyreduce:
   case 51:
 
 /* Line 1455 of yacc.c  */
-#line 375 "syntaxique.y"
+#line 381 "syntaxique.y"
     { strcpy((yyval.expr).type, "chaine"); strcpy((yyval.expr).val, (yyvsp[(1) - (1)].str)); ;}
     break;
 
   case 52:
 
 /* Line 1455 of yacc.c  */
-#line 377 "syntaxique.y"
+#line 383 "syntaxique.y"
     { strcpy((yyval.expr).type, (yyvsp[(1) - (1)].expr).type); strcpy((yyval.expr).val, (yyvsp[(1) - (1)].expr).val); ;}
     break;
 
   case 53:
 
 /* Line 1455 of yacc.c  */
-#line 378 "syntaxique.y"
+#line 384 "syntaxique.y"
     { strcpy((yyval.expr).type, "int"); sprintf((yyval.expr).val, "T%d", temp_var_count++); quadL(1, (yyvsp[(1) - (3)].expr).val, (yyvsp[(3) - (3)].expr).val, (yyval.expr).val); ;}
     break;
 
   case 54:
 
 /* Line 1455 of yacc.c  */
-#line 379 "syntaxique.y"
+#line 385 "syntaxique.y"
     { strcpy((yyval.expr).type, "int"); sprintf((yyval.expr).val, "T%d", temp_var_count++); quadL(2, (yyvsp[(1) - (3)].expr).val, (yyvsp[(3) - (3)].expr).val, (yyval.expr).val); ;}
     break;
 
   case 55:
 
 /* Line 1455 of yacc.c  */
-#line 380 "syntaxique.y"
+#line 386 "syntaxique.y"
     { strcpy((yyval.expr).type, "int"); sprintf((yyval.expr).val, "T%d", temp_var_count++); quadL(3, (yyvsp[(2) - (2)].expr).val, "", (yyval.expr).val); ;}
     break;
 
   case 56:
 
 /* Line 1455 of yacc.c  */
-#line 384 "syntaxique.y"
+#line 390 "syntaxique.y"
     {
         if (!checkdeclaration((yyvsp[(1) - (4)].str))) {
             printf("Erreur Semantique : tableau %s est non declare\n", (yyvsp[(1) - (4)].str));
@@ -2010,7 +2016,7 @@ yyreduce:
 
 
 /* Line 1455 of yacc.c  */
-#line 2014 "syntaxique.tab.c"
+#line 2020 "syntaxique.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2222,7 +2228,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 403 "syntaxique.y"
+#line 409 "syntaxique.y"
 
 
 void yyerror(const char *msg) {
