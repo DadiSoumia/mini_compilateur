@@ -128,14 +128,26 @@ VAR_DEC : define idf deuxpoint TYPE pointverg
        
 // Déclaration d'un Tableau 
 DECTABLE : define idf deuxpoint crochetO TYPE pointverg CONST crochetF pointverg
-        {
-            if (checkdeclaration($2)) {
-                printf("Erreur SYMENTIQUE: Double declaration de l'identifiant '%s', a la ligne '%d' , et la colonne '%d' : \n", $2, nb_ligne, nb_colonne); 
-                nb_erreur_sem++;
-            } else {
-                InsererSymbol(table, $2, $5, "", 2);
-            }
+      {
+    if (checkdeclaration($2)) {
+        printf("Erreur SYNTAXICO-SEMANTIQUE: Double declaration de '%s' ligne %d, colonne %d\n",
+               $2, nb_ligne, nb_colonne);
+        nb_erreur_sem++;
+    }
+    else {
+        int valeur = atoi($7);  // CONST
+
+        if (valeur <= 0) {
+            printf("Erreur SEMANTIQUE: valeur de '%s' doit etre > 0 (ligne %d, colonne %d)\n",
+                   $2, nb_ligne, nb_colonne);
+            nb_erreur_sem++;
         }
+        else {
+            InsererSymbol(table, $2, $7, "", 2);
+        }
+    }
+
+}
 
     ;
 

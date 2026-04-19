@@ -6,7 +6,8 @@ Setup :
     
     define x : integer;
     define y : float;
-    const pi : float = 3.14;
+    const pi : float = 32768.0;
+    define tab : [integer;(-20)] ;
 
 Run :
 {

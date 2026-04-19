@@ -104,11 +104,63 @@ COMM_ligne "%%".*
 
 {CHAINE}        { printf("Chaine de caracteres : %s\n", yytext); nb_colonne += yyleng; yylval.str = strdup(yytext); return chaine; }
 
-{INTEGER}       { printf("Constante entiere : %s\n", yytext); nb_colonne += yyleng; yylval.str = strdup(yytext); return cst; }
-{INTEGER_signe} { printf("Constante entiere signee : %s\n", yytext); nb_colonne += yyleng; yylval.str = strdup(yytext); return integer_signe; }
+{INTEGER}       { 
+    int val = atoi(yytext);
+    if (val < 0 || val > 32767) {
+        printf("Erreur Lexicale, ligne %d, colonne %d, Constante hors limites [0..32767] : %s\n",
+               nb_ligne, nb_colonne, yytext);
+        nb_colonne += yyleng;
+        return erreur;
+    }
+    printf("Constante entiere : %s\n", yytext);
+    nb_colonne += yyleng;
+    yylval.str = strdup(yytext);
+    return cst;
+}
+{INTEGER_signe} {    /* Extraire le nombre entre parenthèses ex: (+123) ou (-456) */
+    char tmp[256];
+    strncpy(tmp, yytext + 1, yyleng - 2);   /* supprime '(' et ')' */
+    tmp[yyleng - 2] = '\0';
+    int val = atoi(tmp);   /* atoi gère +/- automatiquement */
+    if (val < -32768 || val > 32767) {
+        printf("Erreur Lexicale, ligne %d, colonne %d, Constante hors limites [-32768..32767] : %s\n",
+               nb_ligne, nb_colonne, yytext);
+        nb_colonne += yyleng;
+        return erreur;
+    }
+    printf("Constante entiere signee : %s\n", yytext);
+    nb_colonne += yyleng;
+    yylval.str = strdup(yytext);
+    return integer_signe;
+     }
 
-{FLOAT}         { printf("Constante Reelle : %s\n", yytext); nb_colonne += yyleng; yylval.str = strdup(yytext); return cst; }
-{FLOAT_signe}   { printf("Constante Reelle Signee : %s\n", yytext); nb_colonne += yyleng; yylval.str = strdup(yytext); return float_signe; }
+{FLOAT}         { float val = atof(yytext);
+    if (val < 0.0 || val > 32767.9999) {
+        printf("Erreur Lexicale, ligne %d, colonne %d, Constante reelle hors limites [0..32767.9999] : %s\n",
+               nb_ligne, nb_colonne, yytext);
+        nb_colonne += yyleng;
+        return erreur;
+    }
+    printf("Constante Reelle : %s\n", yytext);
+    nb_colonne += yyleng;
+    yylval.str = strdup(yytext);
+    return cst; }
+
+{FLOAT_signe}   { char tmp[256];
+    strncpy(tmp, yytext + 1, yyleng - 2);   /* supprime '(' et ')' */
+    tmp[yyleng - 2] = '\0';
+    float val = atof(tmp);
+    if (val < -32768.0 || val > 32767.9999) {
+        printf("Erreur Lexicale, ligne %d, colonne %d, Constante reelle signee hors limites [-32768..32767.9999] : %s\n",
+               nb_ligne, nb_colonne, yytext);
+        nb_colonne += yyleng;
+        return erreur;
+    }
+    printf("Constante Reelle Signee : %s\n", yytext);
+    nb_colonne += yyleng;
+    yylval.str = strdup(yytext);
+    return float_signe;
+     }
 
 {IDF}           { valider_idf(yytext); nb_colonne += yyleng; yylval.str = strdup(yytext); return idf; }
 
