@@ -1,156 +1,92 @@
 BeginProject M1_iv_2526;
 
-Setup :
+Setup:
+//*
+    DECLARATIONS 
 
-    define x | c | H | i | j: integer;
-    define y : float;
+*//
 
-    
-    define compteur : integer = 0;
-    define moyenne : float = 5.34;
-    define mo: float = (-456.04);
-    define a: float = (+6.0408);
-    define b: float = 9.03;
-   
-    define B  : [integer;10] ; 
-    define tab : [integer;20] ;
+%% variables simples
+define x | y | z : integer;
+define i | j | k : integer;
+define a | b : float;
 
-   
-    const pi : float = 3.14159;
-    const max : integer = 100;
+%% avec initialisation
+define somme : integer = 0;
+define moyenne : float = 0.0;
 
+%% tableaux
+define Tabint : [integer; 50];
+define Tabfloat : [float; 30];
 
-Run :
+%% constantes
+const Pi : float = 3.14159;
+const Max : integer = 100;
+
+Run:
 {
-  
-    %% Affectation avec expression arithmétique
-    a <- x + 5;
-    b <- a * 2;
-    c <-2;
-    B[5]  <- (H+ 2) +  (5  + (-3)) ;
+    //*
+    Instructions 
+    *// 
+    %%  AFFECTATIONS 
+    x <-- 10;
+    y <-- 5;
+    z <-- 2;
 
-    %% Affectation tableau
-    tab[0] <- 42;
-    tab[1] <- x + 1;
-    tab[c] <- tab[c] + tab[c] ;
+    a <-- 2.5;
+    b <-- (a + Pi) * 2.0;
 
-     
-    %% Affectation simple
-    x <- 10;
-    y <- 3.14;
+    Tabint[0] <-- x + y * z;
+    Tabfloat[1] <-- (b + 3.5) / 2.0;
+ 
 
-    %% Condition if-else
-    if (x > 5) then:
+    if ((x > y AND (z < x + y)) OR NON(y == 0)) then:
     {
-        y <- 6;
-    } else {
-        a <- x / 9;
-    } endIf;
+        somme <-- x + y + z;
 
-    %% Condition if sans else
-    if (x == 10) then:
-    {
-        compteur <- compteur + 1;
-    } endIf;
-
-     %% Condition if simbriquée
-    if (x == 10) then:
-    {
-        compteur <- compteur + 1;
-          if (x == 10) then:
-          {
-           compteur <- compteur + 1;
-          } endIf;
-           if (x > 5) then:
-             {
-              a <- x + 1;
-             }
-             else {
-               a <- x - 1;
-                } endIf;
-    } endIf;
-
-
-    %% Boucle while
-    loop while (compteur < max)
-    {
-        compteur <- compteur + 1;
-   
-    } endloop;
-
-    %% Boucles while imbriquées
-    
-    loop while (b < 5)
-    {
-        j <- 0;
-
-        loop while (c < 3)
+        for i in 0 to 10
         {
+            Tabint[i] <-- Tabint[i] + i;
             
-            c <- c + 1;
-        } endloop;
-
-        b <- b + 1;
-    } endloop;
-    
-
-
-    %% Boucle for
-    for i in 1 to 10 {
-         a <- x - 1;
-        tab[i] <- i * 2 ;
-    } endfor;
-   
-        %% Boucles for imbriquées
-    for i in 1 to 5 {
-        
-        for j in 1 to 3 {
-            tab[i] <- i * j;
+            if ((i < 5) AND (Tabint[i] > 10)) then:
+            {
+                Tabfloat[i] <-- Tabint[i] * 1.5;
+            } else {
+                Tabfloat[i] <-- Tabint[i] / 2.0;
+            } endIf;
         } endfor;
 
-    } endfor;
+    } else {
+        somme <-- 0;
+    } endIf;
 
-   %% for avec while interne
-for i in 1 to 4 {
-
-  
-
-    loop while (j < 2)
+    loop while ((x <= Max) AND ((y != 0) OR (z < 10)))
     {
-        tab[i] <- i + j;
-        j <- j + 1;
+        x <-- x + 1;
+
+        %% boucle imbriquée
+        loop while (NON(x == y))
+        {
+            y <-- y + 1;
+
+            Tabint[x + 1] <-- (Tabint[0] + Tabint[1]) * (x - y);
+
+        } endloop;
+
     } endloop;
 
-} endfor;
-
-
-    %% Expressions logiques
-    if (((a > 0) AND (b < 100)) OR ((a > 0) AND (b < 100))) then:
+    for j in 1 to 20
     {
-        c <- 1;
-    } else {
-        c <- 0;
-    } endIf;
+        Tabfloat[j] <-- (Tabfloat[j-1] + Tabfloat[j]) / 2.0;
+        moyenne <-- moyenne + Tabfloat[j];
+    } endfor;
 
-    if ((a == 0) OR (b == 0)) then:
-    {
-        moyenne <- 0.0;
-    } endIf;
+    moyenne <-- moyenne / 20.0;
 
-    if( NON(x == 0)) then:
-    {
-        moyenne <- y / x;
-    } endIf;
-
-    
-   
-
-    %% I/O
     input(x);
-    output("La valeur de x est : ", x);
-    output("Résultat : ", moyenne);
-
+    output("Valeur finale de x: ", x);
+    output("Somme: ", somme);
+    output("Moyenne: ", moyenne);
 
 }
-
-EndProject ;
+EndProject;

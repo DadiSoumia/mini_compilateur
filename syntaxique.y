@@ -228,69 +228,34 @@ AFFECTATION : idf affectation EXPR pointverg
         }
 
 
-        |  idf crochetO cst crochetF affectation EXPR pointverg
-        {
-            if (!checkdeclaration($1)) {
-                printf("Erreur SYMENTIQUE: Non declaration du tableau '%s', a la ligne '%d', et la colonne '%d' : \n", $1, nb_ligne, nb_colonne);
-                nb_erreur_sem++;
-            } else {
-                InfoSymboles *ent = Rechercher(table, $1);
-                int has_error = 0;
-                if (ent->Etat == 1) {
-                    printf("Erreur SYMENTIQUE: Modification d'une constante '%s', a la ligne '%d' , et la colonne '%d' : \n", $1, nb_ligne, nb_colonne);
-                    nb_erreur_sem++;
-                    has_error = 1;
-                }
-                if (strcmp(ent->Type, "int") == 0 && strcmp($6.type, "float") == 0) {
-                    printf("Erreur SYMENTIQUE: Incompatibilite de type lors de l'affectation a '%s' (un tableau d'int ne peut pas recevoir un float) a la ligne '%d' et la colonne '%d' : \n", $1, nb_ligne, nb_colonne);
-                    nb_erreur_sem++;
-                    has_error = 1;
-                }
-                if (!has_error) {
-                    if ($6.val[0] != 'T') {
-                        MettreAJourSymbol(table, $1, $6.val, NULL, ent->Etat);
-                    }
-                    char tmp_arr[50];
-                    sprintf(tmp_arr, "%s[%s]", $1, $3);
-                    quadr("=", $6.val, "", tmp_arr);
-                }
-            }
+      | idf crochetO EXPR crochetF affectation EXPR pointverg
+{
+    if (!checkdeclaration($1)) {
+        printf("Erreur SYMENTIQUE: Non declaration du tableau '%s'\n", $1);
+        nb_erreur_sem++;
+    } else {
+        InfoSymboles *ent = Rechercher(table, $1);
+        int has_error = 0;
+
+        if (ent->Etat == 1) {
+            printf("Erreur SYMENTIQUE: Modification d'une constante '%s'\n", $1);
+            nb_erreur_sem++;
+            has_error = 1;
         }
 
-
-        |  idf crochetO idf crochetF  affectation EXPR pointverg
-        {
-            if (!checkdeclaration($1)) {
-                printf("Erreur Semantique: %s tableau non declare\n", $1);
-                nb_erreur_sem++;
-            } else if (!checkdeclaration($3)) {
-                printf("Erreur SYMENTIQUE: Non declaration de l'identifiant '%s', a la ligne '%d', et la colonne '%d' : \n", $3, nb_ligne, nb_colonne);
-                nb_erreur_sem++;
-            } else {
-                InfoSymboles *ent = Rechercher(table, $1);
-                int has_error = 0;
-                if (ent->Etat == 1) {
-                    printf("Erreur SYMENTIQUE: Modification d'une constante '%s', a la ligne '%d' , et la colonne '%d' : \n", $1, nb_ligne, nb_colonne);
-                    nb_erreur_sem++;
-                    has_error = 1;
-                }
-                if (strcmp(ent->Type, "int") == 0 && strcmp($6.type, "float") == 0) {
-                    printf("Erreur SYMENTIQUE: Incompatibilite de type lors de l'affectation a '%s' (un tableau d'int ne peut pas recevoir un float) a la ligne '%d' et la colonne '%d' : \n", $1, nb_ligne, nb_colonne);
-                    nb_erreur_sem++;
-                    has_error = 1;
-                }
-                if (!has_error) {
-                    if ($6.val[0] != 'T') {
-                        MettreAJourSymbol(table, $1, $6.val, NULL, ent->Etat);
-                    }
-                    char tmp_arr[50];
-                    sprintf(tmp_arr, "%s[%s]", $1, $3);
-                    quadr("=", $6.val, "", tmp_arr);
-                }
-            }
+        if (strcmp(ent->Type, "int") == 0 && strcmp($6.type, "float") == 0) {
+            printf("Erreur SYMENTIQUE: Incompatibilite de type\n");
+            nb_erreur_sem++;
+            has_error = 1;
         }
 
-
+        if (!has_error) {
+            char tmp_arr[50];
+            sprintf(tmp_arr, "%s[%s]", $1, $3.val);
+            quadr("=", $6.val, "", tmp_arr);
+        }
+    }
+}
         ;
 
 

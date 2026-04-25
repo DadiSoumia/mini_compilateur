@@ -88,7 +88,7 @@ COMM_ligne "%%".*
 "!="            { printf("Op. Comparaison : !=\n"); nb_colonne += yyleng; return diff; }
 ">"             { printf("Op. Comparaison : >\n"); nb_colonne += yyleng; return sup; }
 "<"             { printf("Op. Comparaison : <\n"); nb_colonne += yyleng; return inf; }
-"<-"            { printf("Op. Affectation : <-\n"); nb_colonne += yyleng; return affectation; }
+"<--"            { printf("Op. Affectation : <-\n"); nb_colonne += yyleng; return affectation; }
 "="            { printf("Op. Affectation/Egal : =\n"); nb_colonne += yyleng; return egg; }
 
 ";"             { printf("Ponctuation : ;\n"); nb_colonne += yyleng; return pointverg; }

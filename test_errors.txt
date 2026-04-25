@@ -11,13 +11,13 @@ Setup :
 
 Run :
 {
-    b <- 10;               %% ERROR: 'b' is not declared
+    b <--10;               %% ERROR: 'b' is not declared
     
-    x <- 5.5;              %% ERROR: Incompatibilite de type (float to int)
+    x <-- 5.5;              %% ERROR: Incompatibilite de type (float to int)
     
-    y <- 10 / 0;           %% ERROR: Division par zero
+    y <-- 10 / 0;           %% ERROR: Division par zero
     
-    pi <- 4.0;             %% ERROR: Modification d'une constante
+    pi <-- 4.0;             %% ERROR: Modification d'une constante
 }
 
 EndProject ;
