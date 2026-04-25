@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "ts.h"
 #include "quad.h"
 
@@ -26,11 +27,16 @@ int nb_erreur_sem = 0; // Compteur d'erreurs semantiques
         char type[20]; // Pour stocker le type d'une expression (int/float)
         char val[50];  // Pour stocker la valeur textuelle d'une expression
     } expr;
+    int val_int; // Pour la gestion des quadruplets (backpatching)
 }
 
 %type <str> TYPE CONST LISTIDF
 %type <expr> TAB
 %type <expr> EXPR
+%type <expr> CONDITION
+%type <val_int> M 
+%type <val_int> N
+%type <val_int> M_cond
 
 
 %token begin endProject setup run define const_kw
@@ -128,26 +134,14 @@ VAR_DEC : define idf deuxpoint TYPE pointverg
        
 // Déclaration d'un Tableau 
 DECTABLE : define idf deuxpoint crochetO TYPE pointverg CONST crochetF pointverg
-      {
-    if (checkdeclaration($2)) {
-        printf("Erreur SYNTAXICO-SEMANTIQUE: Double declaration de '%s' ligne %d, colonne %d\n",
-               $2, nb_ligne, nb_colonne);
-        nb_erreur_sem++;
-    }
-    else {
-        int valeur = atoi($7);  // CONST
-
-        if (valeur <= 0) {
-            printf("Erreur SEMANTIQUE: valeur de '%s' doit etre > 0 (ligne %d, colonne %d)\n",
-                   $2, nb_ligne, nb_colonne);
-            nb_erreur_sem++;
+        {
+            if (checkdeclaration($2)) {
+                printf("Erreur SYMENTIQUE: Double declaration de l'identifiant '%s', a la ligne '%d' , et la colonne '%d' : \n", $2, nb_ligne, nb_colonne); 
+                nb_erreur_sem++;
+            } else {
+                InsererSymbol(table, $2, $5, "", 2);
+            }
         }
-        else {
-            InsererSymbol(table, $2, $7, "", 2);
-        }
-    }
-
-}
 
     ;
 
@@ -294,11 +288,24 @@ AFFECTATION : idf affectation EXPR pointverg
         ;
 
 
-CONDIF : if_kw parO CONDITION parF then deuxpoint acolO INSTRUCTIONS acolF else_kw acolO INSTRUCTIONS acolF endIf pointverg
-    | if_kw parO CONDITION parF then deuxpoint acolO INSTRUCTIONS acolF endIf pointverg
-    {
-    // bool type 
-    }
+CONDIF : if_kw parO M_cond parF then deuxpoint acolO INSTRUCTIONS acolF endIf pointverg
+        {
+            char temp[20];
+            sprintf(temp, "%d", qc); 
+            // On met à jour le BZ (généré par M_cond) pour qu'il saute à la fin (qc actuel)
+            updateQuad($3, 1, temp); 
+        }
+       | if_kw parO M_cond parF then deuxpoint acolO INSTRUCTIONS acolF N else_kw acolO M INSTRUCTIONS acolF endIf pointverg
+        {
+            char temp[20];
+            // Mettre à jour le BZ de la condition pour qu'il saute au début du bloc ELSE (sauvegardé dans M)
+            sprintf(temp, "%d", $13);
+            updateQuad($3, 1, temp);
+
+            // Mettre à jour le BR (généré par N à la fin du INSTRUCTIONS1) pour qu'il saute complètement a la fin du IF
+            sprintf(temp, "%d", qc);
+            updateQuad($10, 1, temp);
+        }
     ;
 
 
@@ -314,20 +321,74 @@ LECTURE_ECRITURE : out parO chaine virgule EXPR parF pointverg
 
     ;
 
-BOUCLE : loop while_kw parO CONDITION parF acolO INSTRUCTIONS acolF endloop pointverg
-        | for_kw idf in_kw CONST to CONST acolO INSTRUCTIONS acolF endfor pointverg
+BOUCLE : loop while_kw parO M M_cond parF acolO INSTRUCTIONS acolF endloop pointverg
+        {
+            char temp[20];
+            
+            // Quad pour revenir revérifier la condition en haut (M = $4)
+            sprintf(temp, "%d", $4);
+            quadr("BR", temp, "", "");
+            
+            // Mettre à jour le BZ de sortie de boucle (généré par M_cond, qui est $5) pour aller à la fin de la boucle
+            sprintf(temp, "%d", qc);
+            updateQuad($5, 1, temp);
+        }
+        
+       | for_kw idf in_kw CONST to CONST acolO 
         {
             if (!checkdeclaration($2)) {
                 printf("Erreur SYMENTIQUE: Non declaration de l'identifiant '%s', a la ligne '%d', et la colonne '%d' : \n", $2, nb_ligne, nb_colonne);
                 nb_erreur_sem++;
             }
-        }
+            // 1. Initialisation var = CONST1
+            quadr("=", $4, "", $2);
 
-        ;
+            // 2. Sauvegarde du debut de l'évaluation conditionnelle
+            $<val_int>$ = qc; // devient le token $8
+        }
+        {
+            // 3. Evaluation condition : idf <= CONST2
+            char cond[20];
+            sprintf(cond, "T%d", temp_var_count++);
+            quadC(4, $<str>2, $<str>6, cond); 
+            
+            // 4. Sauvegarde de l'adresse du BZ
+            $<val_int>$ = qc; // devient le token $9
+            quadr("BZ", "", cond, "");
+        }
+        INSTRUCTIONS acolF endfor pointverg
+        {
+            char temp[20];
+            
+            // 5. Incrementation interne a la fin du bloc: idf = idf + 1
+            char t_inc[20];
+            sprintf(t_inc, "T%d", temp_var_count++);
+            quadr("+", $<str>2, "1", t_inc);
+            quadr("=", t_inc, "", $<str>2);
+
+            // 6. Saut vers l'évaluation de la condition (le token $8)
+            sprintf(temp, "%d", $<val_int>8);
+            quadr("BR", temp, "", "");
+
+            // 7. Update BZ ($9) pour sauter a la fin après la boucle
+            sprintf(temp, "%d", qc);
+            updateQuad($<val_int>9, 1, temp);
+        }
+    ;
 
 CONDITION : 
-    EXPR
-        ;
+    EXPR { $$ = $1; }
+    ;
+
+M : { $$ = qc; } ;
+
+N : { $$ = qc; quadr("BR", "", "", ""); } ;
+
+M_cond : CONDITION {
+    $$ = qc; // on sauvegarde l'index du quadruplet qui contiendra le 'BZ'
+    quadr("BZ", "", $1.val, ""); // On a pas de destination encore, op1 est vide ("")
+} ;
+
 
 EXPR : EXPR add EXPR
     {

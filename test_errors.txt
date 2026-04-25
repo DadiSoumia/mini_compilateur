@@ -2,7 +2,7 @@ BeginProject Errorest;
 
 Setup :
     define a : integer;
-    define a : float;      %% ERROR: Double declaration of 'a'
+    define a : float;      
     
     define x : integer;
     define y : float;
