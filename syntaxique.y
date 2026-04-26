@@ -138,12 +138,12 @@ DECTABLE : define idf deuxpoint crochetO TYPE pointverg CONST crochetF pointverg
         int valeur = atoi($7);  // CONST
 
         if (valeur <= 0) {
-            printf("Erreur SEMANTIQUE: valeur de '%s' doit etre > 0 (ligne %d, colonne %d)\n",
+            printf("Erreur SEMANTIQUE: valeur de '%s' doit etre positif  (ligne %d, colonne %d)\n",
                    $2, nb_ligne, nb_colonne);
             nb_erreur_sem++;
         }
         else {
-            InsererSymbol(table, $2, $7, "", 2);
+            InsererSymbol(table, $2, $5, $7, 2);
         }
     }
 
@@ -174,8 +174,7 @@ CONST : cst { $$ = $1; }
 TYPE : integer { $$ = "int"; }
         | float_kw { $$ = "float"; }
         ;
-
-// Déclaration multiple de variables 
+ 
 LISTIDF : idf barre idf
         {
             $$ = malloc(strlen($1) + strlen($3) + 2);
@@ -228,7 +227,7 @@ AFFECTATION : idf affectation EXPR pointverg
         }
 
 
-      | idf crochetO EXPR crochetF affectation EXPR pointverg
+     | idf crochetO EXPR crochetF affectation EXPR pointverg
 {
     if (!checkdeclaration($1)) {
         printf("Erreur SYMENTIQUE: Non declaration du tableau '%s'\n", $1);
@@ -237,12 +236,37 @@ AFFECTATION : idf affectation EXPR pointverg
         InfoSymboles *ent = Rechercher(table, $1);
         int has_error = 0;
 
+       
+        if (strcmp($3.type, "int") == 0) {
+
+            int index = atoi($3.val);
+            int taille = atoi(ent->Val);
+
+           
+            if (index < 0) {
+                printf("Erreur SYMENTIQUE: indice negatif %d interdit pour le tableau '%s' (ligne %d, colonne %d)\n",
+                    index, $1, nb_ligne, nb_colonne);
+                nb_erreur_sem++;
+                has_error = 1;
+            }
+
+         
+            if (index >= taille) {
+                printf("Erreur SYMENTIQUE: indice %d depasse taille %d du tableau '%s' (ligne %d, colonne %d)\n",
+                    index, taille, $1, nb_ligne, nb_colonne);
+                nb_erreur_sem++;
+                has_error = 1;
+            }
+        }
+
+       
         if (ent->Etat == 1) {
             printf("Erreur SYMENTIQUE: Modification d'une constante '%s'\n", $1);
             nb_erreur_sem++;
             has_error = 1;
         }
 
+       
         if (strcmp(ent->Type, "int") == 0 && strcmp($6.type, "float") == 0) {
             printf("Erreur SYMENTIQUE: Incompatibilite de type\n");
             nb_erreur_sem++;
@@ -262,7 +286,7 @@ AFFECTATION : idf affectation EXPR pointverg
 CONDIF : if_kw parO CONDITION parF then deuxpoint acolO INSTRUCTIONS acolF else_kw acolO INSTRUCTIONS acolF endIf pointverg
     | if_kw parO CONDITION parF then deuxpoint acolO INSTRUCTIONS acolF endIf pointverg
     {
-    // bool type 
+ 
     }
     ;
 
@@ -275,19 +299,41 @@ LECTURE_ECRITURE : out parO chaine virgule EXPR parF pointverg
             printf("Erreur SYMENTIQUE: Non declaration de l'identifiant '%s', a la ligne '%d', et la colonne '%d' : \n", $3, nb_ligne, nb_colonne);
             nb_erreur_sem++;
         }
+
     }
 
     ;
 
 BOUCLE : loop while_kw parO CONDITION parF acolO INSTRUCTIONS acolF endloop pointverg
         | for_kw idf in_kw CONST to CONST acolO INSTRUCTIONS acolF endfor pointverg
-        {
-            if (!checkdeclaration($2)) {
-                printf("Erreur SYMENTIQUE: Non declaration de l'identifiant '%s', a la ligne '%d', et la colonne '%d' : \n", $2, nb_ligne, nb_colonne);
-                nb_erreur_sem++;
-            }
-        }
+{
+    if (!checkdeclaration($2)) {
+        printf("Erreur SYMENTIQUE: Non declaration de l'identifiant '%s', a la ligne '%d', et la colonne '%d'\n",
+            $2, nb_ligne, nb_colonne);
+        nb_erreur_sem++;
+    }
 
+    int debut = atoi($4);
+  char tmp[50];
+strcpy(tmp, $6);
+
+// enlever ( )
+if (tmp[0] == '(') {
+    memmove(tmp, tmp + 1, strlen(tmp));
+    tmp[strlen(tmp)-1] = '\0';
+}
+
+int fin = atoi(tmp);
+
+
+
+    if (debut > fin) {
+        printf("Erreur SYMENTIQUE: boucle FOR invalide (%d -> %d). La borne debut doit etre <= borne fin (ligne %d, colonne %d)\n",
+            debut, fin, nb_ligne, nb_colonne);
+        nb_erreur_sem++;
+    }
+
+}
         ;
 
 CONDITION : 

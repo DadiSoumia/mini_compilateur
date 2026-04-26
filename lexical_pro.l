@@ -110,7 +110,7 @@ COMM_ligne "%%".*
         printf("Erreur Lexicale, ligne %d, colonne %d, Constante hors limites [0..32767] : %s\n",
                nb_ligne, nb_colonne, yytext);
         nb_colonne += yyleng;
-        return erreur;
+          return cst;
     }
     printf("Constante entiere : %s\n", yytext);
     nb_colonne += yyleng;
@@ -126,8 +126,7 @@ COMM_ligne "%%".*
         printf("Erreur Lexicale, ligne %d, colonne %d, Constante hors limites [-32768..32767] : %s\n",
                nb_ligne, nb_colonne, yytext);
         nb_colonne += yyleng;
-        return erreur;
-    }
+  return integer_signe;    }
     printf("Constante entiere signee : %s\n", yytext);
     nb_colonne += yyleng;
     yylval.str = strdup(yytext);
@@ -139,7 +138,7 @@ COMM_ligne "%%".*
         printf("Erreur Lexicale, ligne %d, colonne %d, Constante reelle hors limites [0..32767.9999] : %s\n",
                nb_ligne, nb_colonne, yytext);
         nb_colonne += yyleng;
-        return erreur;
+        return cst;
     }
     printf("Constante Reelle : %s\n", yytext);
     nb_colonne += yyleng;
@@ -154,7 +153,7 @@ COMM_ligne "%%".*
         printf("Erreur Lexicale, ligne %d, colonne %d, Constante reelle signee hors limites [-32768..32767.9999] : %s\n",
                nb_ligne, nb_colonne, yytext);
         nb_colonne += yyleng;
-        return erreur;
+        return float_signe;
     }
     printf("Constante Reelle Signee : %s\n", yytext);
     nb_colonne += yyleng;

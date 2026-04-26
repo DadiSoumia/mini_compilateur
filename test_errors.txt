@@ -8,6 +8,7 @@ Setup :
     define y : float;
     const pi : float = 32768.0;
     define tab : [integer;(-20)] ;
+     define T : [integer;20] ;
 
 Run :
 {
@@ -18,6 +19,15 @@ Run :
     y <-- 10 / 0;           %% ERROR: Division par zero
     
     pi <-- 4.0;             %% ERROR: Modification d'une constante
+
+    T[30] <-- 5 ;         %% ERROR: indice superieur a l'indicie originale 
+
+    for a in 10 to (-7)  
+        {
+            T[a] <-- (-7);    
+            
+            
+        } endfor;
 }
 
 EndProject ;
