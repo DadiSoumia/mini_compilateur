@@ -1,13 +1,13 @@
 BeginProject Errorest;
 
 Setup :
-    define a : integer;
+    define a : integer;    %% double declaration 
     define a : float;      
     
     define x : integer;
     define y : float;
-    const pi : float = 32768.0;
-    define tab : [integer;(-20)] ;
+    const pi : float = 32768.0;   %% erreur lexical 
+    define tab : [integer;(-20)] ;   %% inidice negatif pour un tableau 
      define T : [integer;20] ;
 
 Run :
@@ -22,7 +22,7 @@ Run :
 
     T[30] <-- 5 ;         %% ERROR: indice superieur a l'indicie originale 
 
-    for a in 10 to (-7)  
+    for a in 10 to (-7)    %% premier indice doit etre inf a deuxieme indice 
         {
             T[a] <-- (-7);    
             
