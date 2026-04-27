@@ -4,7 +4,10 @@
 #include "ts.h"
 #include "quad.h"
 
-int temp_var_count = 0; // Compteur pour les variables temporaires des quadruplets
+
+int temp_var_count = 0;
+int for_cond_start = 0;  
+int for_bz_index = 0; 
 
 extern int nb_ligne;
 extern int nb_colonne;
@@ -13,7 +16,7 @@ extern char* yytext;
 void yyerror(const char *msg);
 void yyerror(const char *s);
 
-int nb_erreur_sem = 0; // Compteur d'erreurs semantiques
+int nb_erreur_sem = 0; 
 
 %}
 
@@ -21,10 +24,10 @@ int nb_erreur_sem = 0; // Compteur d'erreurs semantiques
 // types
 
 %union {
-    char* str;   // Pour transporter des noms d'identifiants ou des types
+    char* str;   
     struct {
-        char type[20]; // Pour stocker le type d'une expression (int/float)
-        char val[50];  // Pour stocker la valeur textuelle d'une expression
+        char type[20]; 
+        char val[50];  
     } expr;
      int val_int;
 }
@@ -51,7 +54,7 @@ int nb_erreur_sem = 0; // Compteur d'erreurs semantiques
 
 
 
-// priorités 
+
 %right affectation
 %left AND OR NON
 
@@ -74,7 +77,7 @@ DEC : VAR_DEC
     | DECCONST
 	;
 
-// Déclaration d'une Variable simple ou en Liste sans conflit
+// Déclaration d'une Variable simple ou en Liste 
 VAR_DEC : define idf deuxpoint TYPE pointverg
         {
             if (checkdeclaration($2)) {
@@ -97,7 +100,7 @@ VAR_DEC : define idf deuxpoint TYPE pointverg
 
         | define LISTIDF deuxpoint TYPE pointverg
         {
-            // Pour les listes (a|b|c), on utilise la chaîne déjà allouée
+           
             char *list = $2;
             char *token = strtok(list, "|");  // On sépare par le caractère '|'
 
@@ -125,7 +128,7 @@ VAR_DEC : define idf deuxpoint TYPE pointverg
                 } else {
                     InsererSymbol(table, token, $4, $6, 0); // 0 is variable
                 }
-                token = strtok(NULL, "|"); // Passe à l'identifiant suivant
+                token = strtok(NULL, "|"); 
             }
             free(list);
         }
@@ -280,16 +283,16 @@ AFFECTATION : idf affectation EXPR pointverg
 
        if (!has_error) {
 
-    // 🔹 mise à jour (comme ancien code)
+   
     if ($6.val[0] != 'T') {
         MettreAJourSymbol(table, $1, $6.val, NULL, ent->Etat);
     }
 
-    // 🔹 construction A[index]
+   
     char tmp_arr[50];
     sprintf(tmp_arr, "%s[%s]", $1, $3.val);
 
-    // 🔹 quadruplet final
+  
     quadr("=", $6.val, "", tmp_arr);
 }
     }
@@ -301,46 +304,52 @@ CONDIF : if_kw parO M_cond parF then deuxpoint acolO INSTRUCTIONS acolF endIf po
         {
             char temp[20];
             sprintf(temp, "%d", qc); 
-            // On met à jour le BZ (généré par M_cond) pour qu'il saute à la fin (qc actuel)
+           
             updateQuad($3, 1, temp); 
         }
        | if_kw parO M_cond parF then deuxpoint acolO INSTRUCTIONS acolF N else_kw acolO M INSTRUCTIONS acolF endIf pointverg
         {
             char temp[20];
-            // Mettre à jour le BZ de la condition pour qu'il saute au début du bloc ELSE (sauvegardé dans M)
+            
             sprintf(temp, "%d", $13);
             updateQuad($3, 1, temp);
 
-            // Mettre à jour le BR (généré par N à la fin du INSTRUCTIONS1) pour qu'il saute complètement a la fin du IF
+            
             sprintf(temp, "%d", qc);
             updateQuad($10, 1, temp);
         }
     ;
 
 LECTURE_ECRITURE : out parO chaine virgule EXPR parF pointverg
+    {
+        quadr("output", $3, $5.val, "");
+    }
     | out parO chaine parF pointverg
+    {
+        quadr("output", $3, "", "");
+    }
     | in_put parO idf parF pointverg
     {
         if (!checkdeclaration($3)) {
             printf("Erreur SYMENTIQUE: Non declaration de l'identifiant '%s', a la ligne '%d', et la colonne '%d' : \n", $3, nb_ligne, nb_colonne);
             nb_erreur_sem++;
+        } else {
+            quadr("input", $3, "", "");
         }
-
     }
-
-    ;
+        ;
 
 BOUCLE : loop while_kw parO M_cond parF acolO INSTRUCTIONS acolF endloop pointverg
         {
     char temp[20];
 
-    // retour à la condition
+   
     sprintf(temp, "%d", $4);
     quadr("BR", temp, "", "");
 
     // sortie boucle
     sprintf(temp, "%d", qc);
-    updateQuad($4, 1, temp); // ✔ M_cond
+    updateQuad($4, 1, temp); 
 }
 | for_kw idf in_kw CONST to CONST acolO
 {
@@ -359,7 +368,7 @@ BOUCLE : loop while_kw parO M_cond parF acolO INSTRUCTIONS acolF endloop pointve
     }
     int fin = atoi(tmp);
     if (debut > fin) {
-  printf("Erreur SYMENTIQUE: boucle FOR invalide (%d -> %d). La borne debut doit etre <= borne fin (ligne %d, colonne %d)\n",
+       printf("Erreur SYMENTIQUE: boucle FOR invalide (%d -> %d). La borne debut doit etre <= borne fin (ligne %d, colonne %d)\n",
             debut, fin, nb_ligne, nb_colonne);
         nb_erreur_sem++;
     }
@@ -367,29 +376,35 @@ BOUCLE : loop while_kw parO M_cond parF acolO INSTRUCTIONS acolF endloop pointve
     quadr("=", $4, "", $2);
 }
 {
-    char cond[20];  // ✅ déclaration locale ici
+    char cond[20];
     sprintf(cond, "T%d", temp_var_count++);
+
+    for_cond_start = qc;      
     quadC(4, $<str>2, $<str>6, cond);
 
-    $<val_int>$ = qc;
+    for_bz_index = qc;         
     quadr("BZ", "", cond, "");
 }
 INSTRUCTIONS acolF endfor pointverg
 {
     char temp[20];
     char t_inc[20];
+
+    // incrément de i
     sprintf(t_inc, "T%d", temp_var_count++);
     quadr("+", $<str>2, "1", t_inc);
     quadr("=", t_inc, "", $<str>2);
 
-    sprintf(temp, "%d", $<val_int>8);
+
+    sprintf(temp, "%d", for_cond_start);    
     quadr("BR", temp, "", "");
 
+   
     sprintf(temp, "%d", qc);
-    updateQuad($<val_int>9, 1, temp);
+    updateQuad(for_bz_index, 1, temp);      
 }
 ;
-;
+
         
 
 CONDITION : 
