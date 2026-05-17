@@ -3,7 +3,8 @@
 #include <stdlib.h>
 #include "ts.h"
 #include "quad.h"
-
+#include "optim.h" 
+#include "asm_gen.h"    
 
 int temp_var_count = 0;
 int for_cond_start = 0;  
@@ -529,6 +530,8 @@ int main() {
         }
         AfficherTableHG(table);
         afficher_qdr();
+        optimiser(); 
+        generer_asm();   
     }
 
 

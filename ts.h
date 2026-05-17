@@ -30,10 +30,9 @@ void redimensionnerTabHash(TableHashage *tableHash);
 InfoSymboles *Rechercher(TableHashage *tableHash, const char *Nom);
 void InsererSymbol(TableHashage *Tabhashage, char *Nom, char *Type, char *Val, int Etat);
 void AfficherTableHG(TableHashage *tableHash);
-void supprimer(TableHashage *tableHash, char *Nom);
+
 void MettreAJourSymbol(TableHashage *Tabhashage, char *Nom, char *Val, char *Type, int Etat);
 int checkdeclaration(char *idf);
-void libererTable(TableHashage *tableHash);
 
 extern TableHashage *table;
 extern int nb_ligne;

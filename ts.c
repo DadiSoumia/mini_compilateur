@@ -16,7 +16,7 @@ unsigned int HashageColli(const char *str, int tableSize)
 
     while ((c = *str++))
     {
-        hash = ((hash << 5) + hash) + c; // hash = hash * 33 + c
+        hash = ((hash   << 5) + hash) + c; // hash = hash * 33 + c
     }
 
     return hash % tableSize;
@@ -163,50 +163,6 @@ void AfficherTableHG(TableHashage *tableHash)
     printf("+---------+-------------------+-------------------+-------------------+-----------+\n");
 }
 
-void supprimer(TableHashage *tableHash, char *Nom)
-{
-    if (tableHash == NULL || Nom == NULL)
-    {
-        printf("Table de hachage ou nom invalide.\n");
-        return;
-    }
-
-    unsigned int index = HashageColli(Nom, tableHash->taille);
-    InfoSymboles *cour = tableHash->table[index];
-    InfoSymboles *prec = NULL;
-
-    // Parcourir la liste chaînée à l'index donné
-    while (cour != NULL)
-    {
-        if (strcmp(cour->Nom, Nom) == 0)
-        {
-            // Élément trouvé
-            if (prec == NULL)
-            {
-                // Suppression en tête
-                tableHash->table[index] = cour->suivant;
-            }
-            else
-            {
-                // Suppression au milieu ou à la fin
-                prec->suivant = cour->suivant;
-            }
-
-            // Libérer la mémoire de l'élément supprimé
-            free(cour);
-            tableHash->cpt--; // Réduire le compteur des éléments
-            printf("Symbole '%s' supprime avec succes.\n", Nom);
-            return;
-        }
-
-        prec = cour;
-        cour = cour->suivant;
-    }
-
-    // Si aucun élément correspondant n'a été trouvé
-    printf("Symbole '%s' introuvable dans la table.\n", Nom);
-}
-
 int checkdeclaration(char *idf)
 {
     return (Rechercher(table, idf) != NULL);
@@ -240,20 +196,4 @@ void MettreAJourSymbol(TableHashage *Tabhashage, char *Nom, char *Val, char *Typ
 void setType(char *type)
 {
     Type = type;
-}
-
-void libererTable(TableHashage *tableHash)
-{
-    for (int i = 0; i < tableHash->taille; i++)
-    {
-        InfoSymboles *courant = tableHash->table[i];
-        while (courant != NULL)
-        {
-            InfoSymboles *temp = courant;
-            courant = courant->suivant;
-            free(temp);
-        }
-    }
-    free(tableHash->table);
-    free(tableHash);
 }
