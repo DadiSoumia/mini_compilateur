@@ -22,7 +22,6 @@ int nb_erreur_sem = 0;
 %}
 
 
-// types
 
 %union {
     char* str;   
@@ -64,7 +63,7 @@ int nb_erreur_sem = 0;
 %left mult Div
 
 %%
-//Structure Globale : BeginProject Nom_Prog ; Setup : Declarations run : { Instructions } EndProject ; 
+ 
 S: begin idf pointverg setup deuxpoint DECS run deuxpoint acolO INSTRUCTIONS acolF endProject pointverg
     ;
 
@@ -127,7 +126,7 @@ VAR_DEC : define idf deuxpoint TYPE pointverg
                     
                     
                 } else {
-                    InsererSymbol(table, token, $4, $6, 0); // 0 is variable
+                    InsererSymbol(table, token, $4, $6, 0); 
                 }
                 token = strtok(NULL, "|"); 
             }
@@ -284,10 +283,6 @@ AFFECTATION : idf affectation EXPR pointverg
 
        if (!has_error) {
 
-    /* Bug 3 corrige : on ne met PAS a jour le symbole du tableau
-       (Val du tableau = sa taille, pas la valeur d'un element) */
-
-    /* Generer le quadruplet d'affectation dans le tableau */
     char tmp_arr[50];
     sprintf(tmp_arr, "%s[%s]", $1, $3.val);
     quadr("=", $6.val, "", tmp_arr);
@@ -295,7 +290,6 @@ AFFECTATION : idf affectation EXPR pointverg
     }
 }
         ;
-
 
 CONDIF : if_kw parO M_cond parF then deuxpoint acolO INSTRUCTIONS acolF endIf pointverg
         {
@@ -413,8 +407,8 @@ M : { $$ = qc; } ;
 N : { $$ = qc; quadr("BR", "", "", ""); } ;
 
 M_cond : CONDITION {
-    $$ = qc; // on sauvegarde l'index du quadruplet qui contiendra le 'BZ'
-    quadr("BZ", "", $1.val, ""); // On a pas de destination encore, op1 est vide ("")
+    $$ = qc; 
+    quadr("BZ", "", $1.val, ""); 
 } ;
 
 
@@ -503,10 +497,6 @@ TAB : idf crochetO EXPR crochetF
             strcpy($$.val, "");
         }
     }
-
-
-
-
 
 %%
 
