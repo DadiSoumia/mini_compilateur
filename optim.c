@@ -5,6 +5,17 @@
 #include "optim.h"
 
 /* ============================================================
+ *  PROTOTYPES (fonctions publiques)
+ * ============================================================ */
+void simplification_algebrique();
+void propagation_constante();
+void propagation_copie();
+void elimination_redondantes();
+void elimination_code_inutile();
+void afficher_qdr_optimise();
+void optimiser();
+
+/* ============================================================
  *  UTILITAIRES INTERNES
  * ============================================================ */
 
@@ -73,6 +84,224 @@ static void remplacer_dans_operandes(int start, const char *ancien, const char *
             strcpy(quad[i].op1, nouveau);
         if (strcmp(quad[i].op2, ancien) == 0)
             strcpy(quad[i].op2, nouveau);
+    }
+}
+
+/* ============================================================
+ *  UTILITAIRE : est_constante()
+ *  Retourne 1 si la chaîne représente une constante numérique
+ *  (entière ou flottante, éventuellement négative).
+ * ============================================================ */
+static int est_constante(const char *s)
+{
+    if (s == NULL || strlen(s) == 0)
+        return 0;
+    int i = 0;
+    if (s[i] == '-')
+        i++; /* signe optionnel */
+    if (s[i] == '\0')
+        return 0;
+    int a_chiffre = 0;
+    while (s[i] >= '0' && s[i] <= '9')
+    {
+        a_chiffre = 1;
+        i++;
+    }
+    if (s[i] == '.')
+    { /* partie décimale optionnelle */
+        i++;
+        while (s[i] >= '0' && s[i] <= '9')
+            i++;
+    }
+    return (a_chiffre && s[i] == '\0');
+}
+
+/* ============================================================
+ *  4. SIMPLIFICATION ALGÉBRIQUE
+ *  Applique les identités algébriques classiques sur les
+ *  quadruplets arithmétiques pour simplifier ou éliminer
+ *  des calculs inutiles :
+ *
+ *  Addition :
+ *    x + 0  →  (= , x , , res)
+ *    0 + x  →  (= , x , , res)
+ *
+ *  Soustraction :
+ *    x - 0  →  (= , x , , res)
+ *    x - x  →  (= , 0 , , res)
+ *
+ *  Multiplication :
+ *    x * 1  →  (= , x , , res)
+ *    1 * x  →  (= , x , , res)
+ *    x * 0  →  (= , 0 , , res)
+ *    0 * x  →  (= , 0 , , res)
+ *
+ *  Division :
+ *    x / 1  →  (= , x , , res)
+ *    0 / x  →  (= , 0 , , res)  (x ≠ 0)
+ * ============================================================ */
+void simplification_algebrique()
+{
+    for (int i = 0; i < qc; i++)
+    {
+        if (!est_actif(i))
+            continue;
+
+        const char *op = quad[i].oper;
+        char *op1 = quad[i].op1;
+        char *op2 = quad[i].op2;
+        char *res = quad[i].res;
+
+        /* ---- ADDITION ---- */
+        if (strcmp(op, "+") == 0)
+        {
+            /* x + 0  →  = , x */
+            if (est_constante(op2) && atof(op2) == 0.0)
+            {
+                strcpy(quad[i].oper, "=");
+                strcpy(quad[i].op2, "");
+            }
+            /* 0 + x  →  = , x */
+            else if (est_constante(op1) && atof(op1) == 0.0)
+            {
+                strcpy(quad[i].oper, "=");
+                strcpy(quad[i].op1, op2);
+                strcpy(quad[i].op2, "");
+            }
+        }
+
+        /* ---- SOUSTRACTION ---- */
+        else if (strcmp(op, "-") == 0)
+        {
+            /* x - 0  →  = , x */
+            if (est_constante(op2) && atof(op2) == 0.0)
+            {
+                strcpy(quad[i].oper, "=");
+                strcpy(quad[i].op2, "");
+            }
+            /* x - x  →  = , 0 */
+            else if (strcmp(op1, op2) == 0)
+            {
+                strcpy(quad[i].oper, "=");
+                strcpy(quad[i].op1, "0");
+                strcpy(quad[i].op2, "");
+            }
+        }
+
+        /* ---- MULTIPLICATION ---- */
+        else if (strcmp(op, "*") == 0)
+        {
+            /* x * 0  ou  0 * x  →  = , 0 */
+            if ((est_constante(op1) && atof(op1) == 0.0) ||
+                (est_constante(op2) && atof(op2) == 0.0))
+            {
+                strcpy(quad[i].oper, "=");
+                strcpy(quad[i].op1, "0");
+                strcpy(quad[i].op2, "");
+            }
+            /* x * 1  →  = , x */
+            else if (est_constante(op2) && atof(op2) == 1.0)
+            {
+                strcpy(quad[i].oper, "=");
+                strcpy(quad[i].op2, "");
+            }
+            /* 1 * x  →  = , x */
+            else if (est_constante(op1) && atof(op1) == 1.0)
+            {
+                strcpy(quad[i].oper, "=");
+                strcpy(quad[i].op1, op2);
+                strcpy(quad[i].op2, "");
+            }
+        }
+
+        /* ---- DIVISION ---- */
+        else if (strcmp(op, "/") == 0)
+        {
+            /* x / 1  →  = , x */
+            if (est_constante(op2) && atof(op2) == 1.0)
+            {
+                strcpy(quad[i].oper, "=");
+                strcpy(quad[i].op2, "");
+            }
+            /* 0 / x  →  = , 0  (on vérifie que x != 0 pour éviter 0/0) */
+            else if (est_constante(op1) && atof(op1) == 0.0 &&
+                     !(est_constante(op2) && atof(op2) == 0.0))
+            {
+                strcpy(quad[i].oper, "=");
+                strcpy(quad[i].op1, "0");
+                strcpy(quad[i].op2, "");
+            }
+        }
+    }
+}
+
+/* ============================================================
+ *  5. PROPAGATION DE CONSTANTE
+ *  Si on trouve  (= , CSTE , , VAR)  où CSTE est une constante
+ *  numérique, on remplace toutes les occurrences de VAR par CSTE
+ *  dans les quadruplets suivants, tant que VAR n'est pas
+ *  réassignée.
+ *
+ *  Exemple :
+ *    ( = , 10 ,  , x )          →  x est lié à 10
+ *    ( + , x  , y , T0 )        →  ( + , 10 , y , T0 )
+ *    ( = , T0 ,  , somme )      →  inchangé (T0 n'est pas x)
+ *
+ *  Différence avec propagation_copie() :
+ *    - propagation_copie  : propage uniquement les TEMPORAIRES
+ *      (T0, T1, ...) vers leurs usages.
+ *    - propagation_constante : propage les CONSTANTES NUMÉRIQUES
+ *      (littéraux comme 10, 3.14, 0 ...) stockées dans n'importe
+ *      quelle variable (utilisateur ou temporaire).
+ *
+ *  Précaution : on ne propage PAS dans les quadruplets input/output
+ *  ni dans les cibles de branchement (op1 d'un BR, BZ, BNZ, BG...).
+ * ============================================================ */
+void propagation_constante()
+{
+    for (int i = 0; i < qc; i++)
+    {
+        if (!est_actif(i))
+            continue;
+
+        /* On cherche les affectations simples  (= , CSTE , , VAR) */
+        if (strcmp(quad[i].oper, "=") != 0)
+            continue;
+        if (strcmp(quad[i].op2, "") != 0)
+            continue;
+
+        const char *cste = quad[i].op1; /* la constante numérique  */
+        const char *var = quad[i].res;  /* la variable cible        */
+
+        /* La source doit être une constante numérique */
+        if (!est_constante(cste))
+            continue;
+
+        /* La cible ne doit pas être vide */
+        if (strlen(var) == 0)
+            continue;
+
+        /* Propager dans les quadruplets suivants */
+        for (int j = i + 1; j < qc; j++)
+        {
+            if (!est_actif(j))
+                continue;
+
+            /* Si VAR est réassignée, on arrête la propagation */
+            if (strcmp(quad[j].res, var) == 0)
+                break;
+
+            /* Ne pas toucher op1 des branchements (c'est une étiquette) */
+            int j_est_branchement = est_branchement(quad[j].oper);
+
+            /* Remplacer VAR par CSTE dans op1 (sauf branchement) */
+            if (!j_est_branchement && strcmp(quad[j].op1, var) == 0)
+                strcpy(quad[j].op1, cste);
+
+            /* Remplacer VAR par CSTE dans op2 */
+            if (strcmp(quad[j].op2, var) == 0)
+                strcpy(quad[j].op2, cste);
+        }
     }
 }
 
@@ -261,11 +490,13 @@ void afficher_qdr_optimise()
 
 /* ============================================================
  *  FONCTION PRINCIPALE D'OPTIMISATION
- *  Applique les passes dans l'ordre recommandé par le cours :
- *  1. Propagation de copie
- *  2. Élimination des expressions redondantes
- *  3. Élimination du code mort
- *  Plusieurs passes sont faites car chaque passe peut
+ *  Applique les passes dans l'ordre recommandé :
+ *  1. Simplification algébrique  (x+0, x*1, x*0, x-x ...)
+ *  2. Propagation de constante   (= , 10 , , x) → remplace x par 10
+ *  3. Propagation de copie       (= , Ti , , Tj) → remplace Tj par Ti
+ *  4. Élimination des expressions redondantes
+ *  5. Élimination du code mort
+ *  Deux passes complètes sont effectuées car chaque passe peut
  *  créer de nouvelles opportunités pour la suivante.
  * ============================================================ */
 void optimiser()
@@ -275,11 +506,15 @@ void optimiser()
     printf("============================================================\n");
 
     /* Passe 1 */
+    simplification_algebrique();
+    propagation_constante();
     propagation_copie();
     elimination_redondantes();
     elimination_code_inutile();
 
-    /* Passe 2 : une 2e passe exploite les nouvelles copies créées */
+    /* Passe 2 : exploite les nouvelles opportunités créées par la passe 1 */
+    simplification_algebrique();
+    propagation_constante();
     propagation_copie();
     elimination_redondantes();
     elimination_code_inutile();
