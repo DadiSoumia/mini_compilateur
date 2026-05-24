@@ -151,8 +151,7 @@ void generer_asm()
     fprintf(f, "base_pile EQU $\n");
     fprintf(f, "PILE ENDS\n\n");
 
-    /* -------- Segment de données :
-       on déclare toutes les variables (résultats non-temporaires) -------- */
+    /* -------- Segment de données -------- */
     fprintf(f, "DONNEE SEGMENT\n");
 
     /* Déclarer Pi, Max et les tableaux en premier */
@@ -164,6 +163,10 @@ void generer_asm()
     /* Collecter les variables uniques (non temporaires, non vides) */
     char vars[1000][100];
     int nb_vars = 0;
+    strcpy(vars[nb_vars++], "Pi");
+    strcpy(vars[nb_vars++], "Max");
+    strcpy(vars[nb_vars++], "Tabint");
+    strcpy(vars[nb_vars++], "Tabfloat");
 
     strcpy(vars[nb_vars++], "Pi");
     strcpy(vars[nb_vars++], "Max");
@@ -230,6 +233,8 @@ void generer_asm()
     fprintf(f, "    MOV SP, base_pile\n\n");
 
     /* -------- Traduction des quadruplets -------- */
+    int affichage_id = 0; /* compteur unique pour les labels d'affichage */
+
     for (int i = 0; i < qc; i++)
     {
         if (strcmp(quad[i].oper, "NOP") == 0 || strcmp(quad[i].oper, "") == 0)
@@ -362,8 +367,11 @@ void generer_asm()
         /* ---- Output : (output, "msg", val, ) ---- */
         else if (strcmp(op, "output") == 0)
         {
-            /* Affichage simplifié via AX → commentaire explicatif */
-            fprintf(f, "    ; OUTPUT: %s  valeur=%s\n", op1, op2);
+            /* 1. Afficher le message texte */
+            if (strlen(op1) > 0 && strcmp(op1, "") != 0)
+                generer_affichage_message(f, op1, affichage_id++);
+
+            /* 2. Afficher la valeur numérique */
             if (strlen(op2) > 0 && strcmp(op2, "") != 0)
             {
                 charger_dans_AX(f, op2);
@@ -374,9 +382,38 @@ void generer_asm()
         /* ---- Input : (input, var, , ) ---- */
         else if (strcmp(op, "input") == 0)
         {
-            fprintf(f, "    ; INPUT: lire valeur dans %s\n", op1);
-            fprintf(f, "    ; (lire depuis stdin dans AX)\n");
+            fprintf(f, "    ; --- Lire un entier depuis le clavier dans %s ---\n", op1);
+            fprintf(f, "    XOR AX, AX\n"); /* AX = 0 (accumulateur) */
+            fprintf(f, "    XOR BX, BX\n"); /* BX = signe (0=positif) */
+            fprintf(f, "    ; Lire le premier caractère (signe ou chiffre)\n");
+            fprintf(f, "    MOV AH, 01h\n");
+            fprintf(f, "    INT 21h\n");
+            fprintf(f, "    CMP AL, '-'\n");
+            fprintf(f, "    JNE IN_DIGIT_%d\n", affichage_id);
+            fprintf(f, "    MOV BX, 1\n"); /* signe négatif */
+            fprintf(f, "    MOV AH, 01h\n");
+            fprintf(f, "    INT 21h\n"); /* lire chiffre suivant */
+            fprintf(f, "IN_DIGIT_%d:\n", affichage_id);
+            fprintf(f, "    ; Accumuler les chiffres\n");
+            fprintf(f, "IN_LOOP_%d:\n", affichage_id);
+            fprintf(f, "    CMP AL, 0Dh\n"); /* Entrée = fin */
+            fprintf(f, "    JE IN_DONE_%d\n", affichage_id);
+            fprintf(f, "    SUB AL, '0'\n");
+            fprintf(f, "    CBW\n");         /* AL → AX */
+            fprintf(f, "    XCHG AX, CX\n"); /* sauver chiffre dans CX */
+            fprintf(f, "    MOV DX, 10\n");
+            fprintf(f, "    IMUL DX\n");    /* AX = AX * 10 */
+            fprintf(f, "    ADD AX, CX\n"); /* AX = AX + chiffre */
+            fprintf(f, "    MOV AH, 01h\n");
+            fprintf(f, "    INT 21h\n"); /* lire prochain caractère */
+            fprintf(f, "    JMP IN_LOOP_%d\n", affichage_id);
+            fprintf(f, "IN_DONE_%d:\n", affichage_id);
+            fprintf(f, "    CMP BX, 1\n");
+            fprintf(f, "    JNE IN_POS_%d\n", affichage_id);
+            fprintf(f, "    NEG AX\n"); /* appliquer signe négatif */
+            fprintf(f, "IN_POS_%d:\n", affichage_id);
             fprintf(f, "    MOV %s, AX\n", op1);
+            affichage_id++;
         }
 
         fprintf(f, "\n");
