@@ -82,7 +82,7 @@ DEC : VAR_DEC
 VAR_DEC : define idf deuxpoint TYPE pointverg
         {
             if (checkdeclaration($2)) {
-                printf("Erreur SYMENTIQUE: Double declaration de l'identifiant '%s', a la ligne '%d' , et la colonne '%d' : \n", $2, nb_ligne, nb_colonne);
+                printf("Erreur SEMANTIQUE: Double declaration de l'identifiant '%s', a la ligne '%d' , et la colonne '%d' : \n", $2, nb_ligne, nb_colonne);
                 nb_erreur_sem++;
             } else {
                 InsererSymbol(table, $2, $4, "", 0);
@@ -92,7 +92,7 @@ VAR_DEC : define idf deuxpoint TYPE pointverg
         | define idf deuxpoint TYPE egg CONST pointverg
         {
             if (checkdeclaration($2)) {
-                printf("Erreur SYMENTIQUE: Double declaration de l'identifiant '%s', a la ligne '%d' , et la colonne '%d' : \n", $2, nb_ligne, nb_colonne);
+                printf("Erreur SEMANTIQUE: Double declaration de l'identifiant '%s', a la ligne '%d' , et la colonne '%d' : \n", $2, nb_ligne, nb_colonne);
                 nb_erreur_sem++;
             } else {
                 InsererSymbol(table, $2, $4, $6, 0); // 0 is variable
@@ -107,7 +107,7 @@ VAR_DEC : define idf deuxpoint TYPE pointverg
 
             while(token != NULL) {
                 if (checkdeclaration(token)) {
-                    printf("Erreur SYMENTIQUE: Double declaration de l'identifiant '%s', a la ligne '%d' , et la colonne '%d' : \n", token, nb_ligne, nb_colonne);
+                    printf("Erreur SEMANTIQUE: Double declaration de l'identifiant '%s', a la ligne '%d' , et la colonne '%d' : \n", token, nb_ligne, nb_colonne);
                  
                 } else {
                     InsererSymbol(table, token, $4, "", 0);
@@ -123,7 +123,7 @@ VAR_DEC : define idf deuxpoint TYPE pointverg
 
             while(token != NULL) {
                 if (checkdeclaration(token)) {
-                    printf("Erreur SYMENTIQUE: Double declaration de l'identifiant '%s', a la ligne '%d' , et la colonne '%d' : \n", token, nb_ligne, nb_colonne);
+                    printf("Erreur SEMANTIQUE: Double declaration de l'identifiant '%s', a la ligne '%d' , et la colonne '%d' : \n", token, nb_ligne, nb_colonne);
                     
                     
                 } else {
@@ -164,7 +164,7 @@ DECTABLE : define idf deuxpoint crochetO TYPE pointverg CONST crochetF pointverg
 DECCONST : const_kw idf deuxpoint TYPE egg CONST pointverg
         {
             if (checkdeclaration($2)) {
-                printf("Erreur SYMENTIQUE: Double declaration de l'identifiant '%s', a la ligne '%d' , et la colonne '%d' : \n", $2, nb_ligne, nb_colonne);
+                printf("Erreur SEMANTIQUE: Double declaration de l'identifiant '%s', a la ligne '%d' , et la colonne '%d' : \n", $2, nb_ligne, nb_colonne);
                 nb_erreur_sem++;
             } else {
                 InsererSymbol(table, $2, $4, $6, 1);
@@ -211,18 +211,18 @@ INSTRUCTION : AFFECTATION
 AFFECTATION : idf affectation EXPR pointverg
         {
             if (!checkdeclaration($1)) {
-                printf("Erreur SYMENTIQUE: Non declaration de l'identifiant '%s', a la ligne '%d', et la colonne '%d' : \n", $1, nb_ligne, nb_colonne);
+                printf("Erreur SEMANTIQUE: Non declaration de l'identifiant '%s', a la ligne '%d', et la colonne '%d' : \n", $1, nb_ligne, nb_colonne);
                 nb_erreur_sem++;
             } else {
                 InfoSymboles *ent = Rechercher(table, $1);
                 int has_error = 0;
                 if (ent->Etat == 1) {
-                    printf("Erreur SYMENTIQUE: Modification d'une constante '%s', a la ligne '%d' , et la colonne '%d' : \n", $1, nb_ligne, nb_colonne);
+                    printf("Erreur SEMANTIQUE: Modification d'une constante '%s', a la ligne '%d' , et la colonne '%d' : \n", $1, nb_ligne, nb_colonne);
                     nb_erreur_sem++;
                     has_error = 1;
                 }
                 if (strcmp(ent->Type, "int") == 0 && strcmp($3.type, "float") == 0) {
-                    printf("Erreur SYMENTIQUE: Incompatibilite de type lors de l'affectation a '%s' (un int ne peut pas recevoir un float) a la ligne '%d' et la colonne '%d' : \n", $1, nb_ligne, nb_colonne);
+                    printf("Erreur SEMANTIQUE: Incompatibilite de type lors de l'affectation a '%s' (un int ne peut pas recevoir un float) a la ligne '%d' et la colonne '%d' : \n", $1, nb_ligne, nb_colonne);
                     nb_erreur_sem++;
                     has_error = 1;
                 }
@@ -239,7 +239,7 @@ AFFECTATION : idf affectation EXPR pointverg
      | idf crochetO EXPR crochetF affectation EXPR pointverg
 {
     if (!checkdeclaration($1)) {
-        printf("Erreur SYMENTIQUE: Non declaration du tableau '%s'\n", $1);
+        printf("Erreur SEMANTIQUE: Non declaration du tableau '%s'\n", $1);
         nb_erreur_sem++;
     } else {
         InfoSymboles *ent = Rechercher(table, $1);
@@ -253,7 +253,7 @@ AFFECTATION : idf affectation EXPR pointverg
 
            
             if (index < 0) {
-                printf("Erreur SYMENTIQUE: indice negatif %d interdit pour le tableau '%s' (ligne %d, colonne %d)\n",
+                printf("Erreur SEMANTIQUE: indice negatif %d interdit pour le tableau '%s' (ligne %d, colonne %d)\n",
                     index, $1, nb_ligne, nb_colonne);
                 nb_erreur_sem++;
                 has_error = 1;
@@ -261,7 +261,7 @@ AFFECTATION : idf affectation EXPR pointverg
 
          
             if (index >= taille) {
-                printf("Erreur SYMENTIQUE: indice %d depasse taille %d du tableau '%s' (ligne %d, colonne %d)\n",
+                printf("Erreur SEMANTIQUE: indice %d depasse taille %d du tableau '%s' (ligne %d, colonne %d)\n",
                     index, taille, $1, nb_ligne, nb_colonne);
                 nb_erreur_sem++;
                 has_error = 1;
@@ -270,30 +270,26 @@ AFFECTATION : idf affectation EXPR pointverg
 
        
         if (ent->Etat == 1) {
-            printf("Erreur SYMENTIQUE: Modification d'une constante '%s'\n", $1);
+            printf("Erreur SEMANTIQUE: Modification d'une constante '%s'\n", $1);
             nb_erreur_sem++;
             has_error = 1;
         }
 
        
         if (strcmp(ent->Type, "int") == 0 && strcmp($6.type, "float") == 0) {
-            printf("Erreur SYMENTIQUE: Incompatibilite de type\n");
+            printf("Erreur SEMANTIQUE: Incompatibilite de type\n");
             nb_erreur_sem++;
             has_error = 1;
         }
 
        if (!has_error) {
 
-   
-    if ($6.val[0] != 'T') {
-        MettreAJourSymbol(table, $1, $6.val, NULL, ent->Etat);
-    }
+    /* Bug 3 corrige : on ne met PAS a jour le symbole du tableau
+       (Val du tableau = sa taille, pas la valeur d'un element) */
 
-   
+    /* Generer le quadruplet d'affectation dans le tableau */
     char tmp_arr[50];
     sprintf(tmp_arr, "%s[%s]", $1, $3.val);
-
-  
     quadr("=", $6.val, "", tmp_arr);
 }
     }
@@ -355,7 +351,7 @@ BOUCLE : loop while_kw parO M_cond parF acolO INSTRUCTIONS acolF endloop pointve
 | for_kw idf in_kw CONST to CONST acolO
 {
     if (!checkdeclaration($2)) {
-        printf("Erreur SYMENTIQUE: Non declaration de '%s', ligne %d, colonne %d\n",
+        printf("Erreur SEMANTIQUE: Non declaration de '%s', ligne %d, colonne %d\n",
             $2, nb_ligne, nb_colonne);
         nb_erreur_sem++;
     }
@@ -369,7 +365,7 @@ BOUCLE : loop while_kw parO M_cond parF acolO INSTRUCTIONS acolF endloop pointve
     }
     int fin = atoi(tmp);
     if (debut > fin) {
-       printf("Erreur SYMENTIQUE: boucle FOR invalide (%d -> %d). La borne debut doit etre <= borne fin (ligne %d, colonne %d)\n",
+       printf("Erreur SEMANTIQUE: boucle FOR invalide (%d -> %d). La borne debut doit etre <= borne fin (ligne %d, colonne %d)\n",
             debut, fin, nb_ligne, nb_colonne);
         nb_erreur_sem++;
     }
@@ -447,7 +443,7 @@ EXPR : EXPR add EXPR
     | EXPR Div EXPR
     {
         if (strcmp($3.val, "0") == 0 || strcmp($3.val, "0.0") == 0 || strcmp($3.val, "(+0)") == 0) {
-            printf("Erreur SYMENTIQUE: Division par zero detectee a la ligne '%d' et la colonne '%d' : \n", nb_ligne, nb_colonne);
+            printf("Erreur SEMANTIQUE: Division par zero detectee a la ligne '%d' et la colonne '%d' : \n", nb_ligne, nb_colonne);
             nb_erreur_sem++;
         }
         if (strcmp($1.type, "float") == 0 || strcmp($3.type, "float") == 0) strcpy($$.type, "float");
@@ -466,7 +462,7 @@ EXPR : EXPR add EXPR
     | idf
     {
         if (!checkdeclaration($1)) {
-            printf("Erreur SYMENTIQUE: Non declaration de l'identifiant '%s', a la ligne '%d', et la colonne '%d' : \n", $1, nb_ligne, nb_colonne);
+            printf("Erreur SEMANTIQUE: Non declaration de l'identifiant '%s', a la ligne '%d', et la colonne '%d' : \n", $1, nb_ligne, nb_colonne);
            
         }
         InfoSymboles *ent = Rechercher(table, $1);
@@ -515,7 +511,8 @@ TAB : idf crochetO EXPR crochetF
 %%
 
 void yyerror(const char *msg) {
-    fprintf(stderr, "Erreur Syntaxique, ligne %d, colonne %d, entite : %s\n", nb_ligne, nb_colonne, yytext, msg);
+    fprintf(stderr, "Erreur Syntaxique, ligne %d, colonne %d, entite : '%s' (%s)\n",
+            nb_ligne, nb_colonne, yytext, msg);
 }
 
 int main() {

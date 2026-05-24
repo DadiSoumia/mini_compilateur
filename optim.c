@@ -26,14 +26,36 @@ static int est_actif(int i)
     return (strcmp(quad[i].oper, "NOP") != 0 && strcmp(quad[i].oper, "") != 0);
 }
 
+/* ============================================================
+ *  CORRECTION : contient_temporaire()
+ *  Vérifie si la chaîne 'chaine' contient la temporaire 'res'
+ *  comme sous-chaîne (ex: "Tabint[T32]" contient "T32").
+ *  On s'assure que c'est bien une occurrence isolée de la
+ *  temporaire et non un préfixe d'une autre (ex: T3 != T32).
+ * ============================================================ */
+static int contient_temporaire(const char *chaine, const char *res)
+{
+    char *pos = strstr(chaine, res);
+    if (pos == NULL)
+        return 0;
+
+    /* Vérifier que le caractère APRÈS la temporaire n'est pas un chiffre
+       (pour éviter de confondre T3 avec T32) */
+    int len = strlen(res);
+    char apres = pos[len];
+    if (apres >= '0' && apres <= '9')
+        return 0;
+
+    return 1;
+}
+
 /* Remplace toutes les occurrences de 'ancien' par 'nouveau'
    dans op1 et op2 des quadruplets de start à qc-1,
    en s'arrêtant dès que 'ancien' ou 'nouveau' est réassigné (res). */
 static void remplacer_dans_operandes(int start, const char *ancien, const char *nouveau)
 {
-    /* ✅ AJOUT : on ne propage pas si 'ancien' est une variable utilisateur */
-    /* (une variable utilisateur = pas une temporaire)                       */
-    /* car elle peut etre lue directement dans output, input, etc.           */
+    /* On ne propage pas si 'ancien' est une variable utilisateur */
+    /* car elle peut etre lue directement dans output, input, etc. */
     if (!est_temporaire(ancien))
         return;
 
@@ -53,6 +75,7 @@ static void remplacer_dans_operandes(int start, const char *ancien, const char *
             strcpy(quad[i].op2, nouveau);
     }
 }
+
 /* ============================================================
  *  1. PROPAGATION DE COPIE
  *  Si on trouve  (= , X , , Y)  →  on remplace Y par X
@@ -74,8 +97,7 @@ void propagation_copie()
             if (strlen(source) == 0 || strcmp(source, cible) == 0)
                 continue;
 
-            /* ✅ AJOUT : on ne propage que si la SOURCE est une temporaire */
-            /* Cela evite de remplacer x par 5 partout                      */
+            /* On ne propage que si la SOURCE est une temporaire */
             if (!est_temporaire(source))
                 continue;
 
@@ -159,9 +181,14 @@ void elimination_redondantes()
 /* ============================================================
  *  3. ÉLIMINATION DU CODE MORT (code inutile)
  *  Un quadruplet est inutile si son résultat :
- *   - est une temporaire (commence par T)
- *   - n'apparaît jamais dans op1 ou op2 d'un autre quadruplet
+ *   - est une temporaire (commence par T + chiffre)
+ *   - n'apparaît jamais dans op1, op2, ou res d'un autre quadruplet
+ *     (y compris à l'intérieur d'une chaîne comme "Tabint[T32]")
  *  On le marque NOP.
+ *
+ *  CORRECTION : utilisation de contient_temporaire() au lieu de
+ *  strcmp() pour détecter les temporaires cachées dans les chaînes
+ *  de type "Tabint[T32]" ou "Tabfloat[T37]".
  * ============================================================ */
 void elimination_code_inutile()
 {
@@ -188,13 +215,13 @@ void elimination_code_inutile()
                 continue;
             if (!est_actif(j))
                 continue;
-            if (strcmp(quad[j].op1, res) == 0 || strcmp(quad[j].op2, res) == 0)
-            {
-                utilise = 1;
-                break;
-            }
-            /* Aussi vérifier dans res (cas d'une copie : = T3 , , T5) */
-            if (strcmp(quad[j].oper, "=") == 0 && strcmp(quad[j].op1, res) == 0)
+
+            /* CORRECTION : on cherche la temporaire dans op1, op2 ET res
+               avec contient_temporaire() pour détecter les cas cachés
+               comme "Tabint[T32]" ou "Tabfloat[T37]"                    */
+            if (contient_temporaire(quad[j].op1, res) ||
+                contient_temporaire(quad[j].op2, res) ||
+                contient_temporaire(quad[j].res, res))
             {
                 utilise = 1;
                 break;

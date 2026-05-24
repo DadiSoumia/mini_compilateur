@@ -28,7 +28,7 @@ FLOAT {chiffre}+"."{chiffre}+
 INTEGER_signe  \([+-]{chiffre}+\)
 FLOAT_signe \([+-]{chiffre}+"."{chiffre}+\)
 
-IDF {lettreM}(_?[a-z0-9])*
+IDF {lettreM}(_?[a-zA-Z0-9])*
 CST INTEGER|FLOAT|INTEGER_signe|FLOAT_signe
 
 CHAINE \"([^\"\\]|\\.)*\"

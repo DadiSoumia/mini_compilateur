@@ -4,12 +4,30 @@
 #include "quad.h"
 
 // Variables globales
-qdr quad[1000];
+#define QUAD_CAPACITE_INITIALE 256
+qdr *quad = NULL;
 int qc = 0;
+static int quad_capacite = 0;
+
+/* Initialise (ou re-verifie) l'allocation du tableau de quadruplets */
+static void quad_assurer_capacite()
+{
+    if (quad == NULL) {
+        quad = malloc(sizeof(qdr) * QUAD_CAPACITE_INITIALE);
+        if (!quad) { fprintf(stderr, "Erreur : allocation quadruplets\n"); exit(1); }
+        quad_capacite = QUAD_CAPACITE_INITIALE;
+    }
+    if (qc >= quad_capacite) {
+        quad_capacite *= 2;
+        quad = realloc(quad, sizeof(qdr) * quad_capacite);
+        if (!quad) { fprintf(stderr, "Erreur : reallocation quadruplets\n"); exit(1); }
+    }
+}
 
 /* 1- Fonction d'ajout d'un quadruplet a une table de quadruplets */
 void quadr(char opr[], char op1[], char op2[], char res[])
 {
+    quad_assurer_capacite();
     strcpy(quad[qc].oper, opr);
     strcpy(quad[qc].op1, op1);
     strcpy(quad[qc].op2, op2);
@@ -22,6 +40,10 @@ selon la position : (0,1,2,3)
 */
 void updateQuad(int num_quad, int colon_quad, char val[])
 {
+    if (num_quad < 0 || num_quad >= qc) {
+        fprintf(stderr, "Erreur updateQuad : index %d hors bornes [0..%d]\n", num_quad, qc - 1);
+        return;
+    }
     if (colon_quad == 0) strcpy(quad[num_quad].oper, val);
     else if (colon_quad == 1) strcpy(quad[num_quad].op1, val);
     else if (colon_quad == 2) strcpy(quad[num_quad].op2, val);

@@ -33,6 +33,7 @@ void AfficherTableHG(TableHashage *tableHash);
 
 void MettreAJourSymbol(TableHashage *Tabhashage, char *Nom, char *Val, char *Type, int Etat);
 int checkdeclaration(char *idf);
+void setType(char *type);
 
 extern TableHashage *table;
 extern int nb_ligne;

@@ -116,9 +116,12 @@ void InsererSymbol(TableHashage *Tabhashage, char *Nom, char *Type, char *Val, i
         return;
     }
 
-    strcpy(nouvSymbol->Nom, Nom);
-    strcpy(nouvSymbol->Type, Type);
-    strcpy(nouvSymbol->Val, Val);
+    strncpy(nouvSymbol->Nom, Nom, sizeof(nouvSymbol->Nom) - 1);
+    nouvSymbol->Nom[sizeof(nouvSymbol->Nom) - 1] = '\0';
+    strncpy(nouvSymbol->Type, Type, sizeof(nouvSymbol->Type) - 1);
+    nouvSymbol->Type[sizeof(nouvSymbol->Type) - 1] = '\0';
+    strncpy(nouvSymbol->Val, Val, sizeof(nouvSymbol->Val) - 1);
+    nouvSymbol->Val[sizeof(nouvSymbol->Val) - 1] = '\0';
     nouvSymbol->Etat = Etat;
 
     nouvSymbol->suivant = Tabhashage->table[index];
@@ -183,11 +186,13 @@ void MettreAJourSymbol(TableHashage *Tabhashage, char *Nom, char *Val, char *Typ
     // Met à jour les informations du symbole
     if (Type != NULL)
     {
-        strcpy(symbol->Type, Type);
+        strncpy(symbol->Type, Type, sizeof(symbol->Type) - 1);
+        symbol->Type[sizeof(symbol->Type) - 1] = '\0';
     }
     if (Val != NULL)
     {
-        strcpy(symbol->Val, Val);
+        strncpy(symbol->Val, Val, sizeof(symbol->Val) - 1);
+        symbol->Val[sizeof(symbol->Val) - 1] = '\0';
     }
 
     symbol->Etat = Etat;
