@@ -8,6 +8,10 @@ base_pile EQU $
 PILE ENDS
 
 DONNEE SEGMENT
+    Pi       DW 3
+    Max      DW 0
+    Tabint   DW 100 DUP(?)
+    Tabfloat DW 100 DUP(?)
     x DW ?
     y DW ?
     z DW ?
@@ -57,6 +61,8 @@ DONNEE SEGMENT
     T40 DW ?
     T41 DW ?
     T42 DW ?
+    T32 DW ?
+    T37 DW ?
 DONNEE ENDS
 
 LECODE SEGMENT
@@ -82,7 +88,7 @@ L2:
     MOV z, AX
 
 L3:
-    MOV AX, 2.5
+    MOV AX, 2
     MOV a, AX
 
 L4:
@@ -93,7 +99,7 @@ L4:
 
 L5:
     MOV AX, T0
-    MOV BX, 2.0
+    MOV BX, 2
     IMUL BX
     MOV T1, AX
 
@@ -115,24 +121,25 @@ L8:
 
 L9:
     MOV AX, T3
-    MOV Tabint[0], AX
+    MOV SI, 0
+    MOV Tabint[SI], AX
 
 L10:
     MOV AX, b
-    MOV BX, 3.5
-    ADD AX, BX
+    ADD AX, 3
     MOV T4, AX
 
 L11:
     MOV AX, T4
     CWD
-    MOV BX, 2.0
+    MOV BX, 2
     IDIV BX
     MOV T5, AX
 
 L12:
     MOV AX, T5
-    MOV Tabfloat[1], AX
+    MOV SI, 1
+    MOV Tabfloat[SI], AX
 
 L13:
     MOV AX, x
@@ -309,14 +316,16 @@ L53:
     JE L80
 
 L54:
-    MOV AX, Tabint[i]
+    MOV SI, i
+    MOV AX, Tabint[SI]
     MOV BX, i
     ADD AX, BX
     MOV T16, AX
 
 L55:
     MOV AX, T16
-    MOV Tabint[i], AX
+    MOV SI, i
+    MOV Tabint[SI], AX
 
 L56:
     MOV AX, i
@@ -340,7 +349,8 @@ L60:
     MOV T17, AX
 
 L61:
-    MOV AX, Tabint[i]
+    MOV SI, i
+    MOV AX, Tabint[SI]
     SUB AX, 10
     MOV T18, AX
 
@@ -387,28 +397,32 @@ L71:
     JE L75
 
 L72:
-    MOV AX, Tabint[i]
-    MOV BX, 1.5
+    MOV SI, i
+    MOV AX, Tabint[SI]
+    MOV BX, 1
     IMUL BX
     MOV T20, AX
 
 L73:
     MOV AX, T20
-    MOV Tabfloat[i], AX
+    MOV SI, i
+    MOV Tabfloat[SI], AX
 
 L74:
     JMP L77
 
 L75:
-    MOV AX, Tabint[i]
+    MOV SI, i
+    MOV AX, Tabint[SI]
     CWD
-    MOV BX, 2.0
+    MOV BX, 2
     IDIV BX
     MOV T21, AX
 
 L76:
     MOV AX, T21
-    MOV Tabfloat[i], AX
+    MOV SI, i
+    MOV Tabfloat[SI], AX
 
 L77:
     MOV AX, i
@@ -601,8 +615,10 @@ L121:
     MOV y, AX
 
 L123:
-    MOV AX, Tabint[0]
-    MOV BX, Tabint[1]
+    MOV SI, 0
+    MOV AX, Tabint[SI]
+    MOV DI, 1
+    MOV BX, Tabint[DI]
     ADD AX, BX
     MOV T33, AX
 
@@ -620,7 +636,8 @@ L125:
 
 L126:
     MOV AX, T35
-    MOV Tabint[T32], AX
+    MOV SI, T32
+    MOV Tabint[SI], AX
 
 L127:
     JMP L119
@@ -659,25 +676,29 @@ L135:
     JE L145
 
 L137:
-    MOV AX, Tabfloat[T37]
-    MOV BX, Tabfloat[j]
+    MOV SI, T37
+    MOV AX, Tabfloat[SI]
+    MOV DI, j
+    MOV BX, Tabfloat[DI]
     ADD AX, BX
     MOV T38, AX
 
 L138:
     MOV AX, T38
     CWD
-    MOV BX, 2.0
+    MOV BX, 2
     IDIV BX
     MOV T39, AX
 
 L139:
     MOV AX, T39
-    MOV Tabfloat[j], AX
+    MOV SI, j
+    MOV Tabfloat[SI], AX
 
 L140:
     MOV AX, moyenne
-    MOV BX, Tabfloat[j]
+    MOV DI, j
+    MOV BX, Tabfloat[DI]
     ADD AX, BX
     MOV T40, AX
 
@@ -700,7 +721,7 @@ L144:
 L145:
     MOV AX, moyenne
     CWD
-    MOV BX, 20.0
+    MOV BX, 20
     IDIV BX
     MOV T42, AX
 
