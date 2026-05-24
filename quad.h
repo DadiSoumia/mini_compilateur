@@ -9,7 +9,7 @@ typedef struct {
     char res[100];  
 } qdr;
 
-extern qdr quad[1000];
+extern qdr *quad;   /* tableau dynamique, alloue dans quad.c */
 extern int qc;
 
 // Prototypes des fonctions
