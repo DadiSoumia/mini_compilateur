@@ -117,11 +117,11 @@ COMM_ligne "%%".*
     yylval.str = strdup(yytext);
     return cst;
 }
-{INTEGER_signe} {    /* Extraire le nombre entre parenthèses ex: (+123) ou (-456) */
+{INTEGER_signe} {   
     char tmp[256];
-    strncpy(tmp, yytext + 1, yyleng - 2);   /* supprime '(' et ')' */
+    strncpy(tmp, yytext + 1, yyleng - 2);   
     tmp[yyleng - 2] = '\0';
-    int val = atoi(tmp);   /* atoi gère +/- automatiquement */
+    int val = atoi(tmp);   
     if (val < -32768 || val > 32767) {
         printf("Erreur Lexicale, ligne %d, colonne %d, Constante hors limites [-32768..32767] : %s\n",
                nb_ligne, nb_colonne, yytext);
@@ -146,7 +146,7 @@ COMM_ligne "%%".*
     return cst; }
 
 {FLOAT_signe}   { char tmp[256];
-    strncpy(tmp, yytext + 1, yyleng - 2);   /* supprime '(' et ')' */
+    strncpy(tmp, yytext + 1, yyleng - 2);   
     tmp[yyleng - 2] = '\0';
     float val = atof(tmp);
     if (val < -32768.0 || val > 32767.9999) {
@@ -172,5 +172,3 @@ COMM_ligne "%%".*
 int yywrap() {
     return 1;
 }
-
-/* main program has been integrated into syntaxique.y */
